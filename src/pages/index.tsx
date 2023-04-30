@@ -23,6 +23,9 @@ export default function Home() {
         <li>
           <Link href="/test/one-col-infinite">/test/one-col-infinite</Link>
         </li>
+        <li>
+          <Link href="/test/fixed-col-count-grid">/test/fixed-col-count-grid</Link>
+        </li>
       </ul>
     </>
   );

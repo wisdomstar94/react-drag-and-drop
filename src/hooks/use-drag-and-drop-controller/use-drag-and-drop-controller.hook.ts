@@ -197,13 +197,13 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
          * [ 2 ]
          * ...
          */
-        yInfoMaxIndex = itemTotalCount + 1;
+        yInfoMaxIndex = itemTotalCount;
       } break;
       case 'one-row-infinite': {
         /**
          * [ 0 ] [ 1 ] [ 2 ] ...
          */
-        xInfoMaxIndex = itemTotalCount + 1;
+        xInfoMaxIndex = itemTotalCount;
       } break;
       case 'fixed-col-count-grid': {
         /**
@@ -212,7 +212,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
          * [ 4 ] [ 5 ] 
          * ... ...
          */
-        yInfoMaxIndex = Math.ceil((itemTotalCount + 1) / 2);
+        yInfoMaxIndex = Math.ceil((itemTotalCount) / 2);
         xInfoMaxIndex = fixedColCount;
       } break;
       // case 'fixed-row-count-grid': {
@@ -305,10 +305,25 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       pageX: getEventPageX(event),
       pageY: getEventPageY(event),
     });
-  }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
+
+    convertMapToArray(listMap.current).forEach((item) => {
+      if (item.value.ref.current === null) return;
+      if (item.value.ref === dragFirstStartFromInfo?.info.ref) {
+        let currentElement: HTMLElement | null | undefined = item.value.ref.current;
+        for (let i = 0; i < 2; i++) {
+          if (currentElement !== null && currentElement !== undefined) {
+            currentElement.style.zIndex = '2';  
+          }
+          currentElement = currentElement?.parentElement;
+        }
+        return;
+      };
+      // if (item.value.ref.current.style.position === 'static') return;
+      item.value.ref.current.style.zIndex = '1';
+    });
+  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
-    console.log('@@onMovingTargetRef.target', target);
     if (target === undefined) return;
 
     const ref = target.ref;
@@ -502,6 +517,15 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     const arr = convertMapToArray(listMap.current);
     arr.forEach((item, index) => {
+      // item.value.ref.current?.style.removeProperty('z-index');
+      let currentElement: HTMLElement | null | undefined = item.value.ref.current;
+      for (let i = 0; i < 2; i++) {
+        if (currentElement !== null && currentElement !== undefined) {
+          currentElement.style.removeProperty('z-index');
+        }
+        currentElement = currentElement?.parentElement;
+      }
+
       const children = item.value.ref.current?.children;
       if (children === undefined) return;
       for (let i = 0; i < children.length; i++) {
