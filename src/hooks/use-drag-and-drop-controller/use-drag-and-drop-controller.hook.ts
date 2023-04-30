@@ -293,7 +293,19 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       pageX: getEventPageX(event),
       pageY: getEventPageY(event),
     });
-  }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo]);
+    setDragToInfo({
+      name: dragFirstStartFromInfo?.name ?? '',
+      item: dragFirstStartFromInfo?.info.list?.at(index),
+      targetIndex: index,
+      targetItemElement: null,
+      targetItemElementRect: undefined,
+      ref: dragFirstStartFromInfo?.info.ref ?? createRef(),
+      clientX: getEventClientX(event),
+      clientY: getEventClientY(event),
+      pageX: getEventPageX(event),
+      pageY: getEventPageY(event),
+    });
+  }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
     if (target === undefined) return;
@@ -484,6 +496,8 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   }, [convertMapToArray, getDragFromInfo, getEventCursorAbsoluteXY, getEventPageX, getEventPageY, getRefAbsolutePointRange, isDragging, isIncludePointRangeTargetCursor, onMovingTargetRef]);
 
   const onPressEnd = useCallback((event: MouseEvent | TouchEvent) => {
+    if (!isDragging) return;
+
     const arr = convertMapToArray(listMap.current);
     arr.forEach((item, index) => {
       const children = item.value.ref.current?.children;
@@ -514,7 +528,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     onListsChange(changeInfo);
     setIsDragging(false);
-  }, [convertMapToArray, getDragFromInfo, getDragToInfo, onListsChange]);
+  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onListsChange]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
