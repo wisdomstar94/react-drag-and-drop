@@ -197,13 +197,13 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
          * [ 2 ]
          * ...
          */
-        yInfoMaxIndex = itemTotalCount;
+        yInfoMaxIndex = itemTotalCount + 1;
       } break;
       case 'one-row-infinite': {
         /**
          * [ 0 ] [ 1 ] [ 2 ] ...
          */
-        xInfoMaxIndex = itemTotalCount;
+        xInfoMaxIndex = itemTotalCount + 1;
       } break;
       case 'fixed-col-count-grid': {
         /**
@@ -212,7 +212,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
          * [ 4 ] [ 5 ] 
          * ... ...
          */
-        yInfoMaxIndex = Math.ceil(itemTotalCount / 2);
+        yInfoMaxIndex = Math.ceil((itemTotalCount + 1) / 2);
         xInfoMaxIndex = fixedColCount;
       } break;
       // case 'fixed-row-count-grid': {
@@ -308,6 +308,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
+    console.log('@@onMovingTargetRef.target', target);
     if (target === undefined) return;
 
     const ref = target.ref;
@@ -428,6 +429,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     } else {
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
+          console.log('@dragDestinationTargetIndexInfo', dragDestinationTargetIndexInfo.index);
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
               (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');

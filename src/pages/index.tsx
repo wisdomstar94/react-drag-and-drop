@@ -20,6 +20,9 @@ export default function Home() {
         <li>
           <Link href="/test/one-row-infinite">/test/one-row-infinite</Link>
         </li>
+        <li>
+          <Link href="/test/one-col-infinite">/test/one-col-infinite</Link>
+        </li>
       </ul>
     </>
   );

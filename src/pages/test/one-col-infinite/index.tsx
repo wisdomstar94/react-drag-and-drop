@@ -3,7 +3,7 @@ import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook
 import { ICommon } from "@/interfaces/common.interface";
 import { useState } from "react";
 
-export default function OneRowInfiniteTestPage() {
+export default function OneColInfiniteTestPage() {
   const [aList, setAList] = useState<ICommon.Item[] | undefined>([
     { name: 'a', value: 'a', },
     { name: 'aaa', value: 'aaa', },
@@ -34,7 +34,7 @@ export default function OneRowInfiniteTestPage() {
     name: 'aList',
     list: aList,
     listLayout: {
-      type: 'one-row-infinite',
+      type: 'one-col-infinite',
     },
   });
 
@@ -43,48 +43,48 @@ export default function OneRowInfiniteTestPage() {
     name: 'bList',
     list: bList,
     listLayout: {
-      type: 'one-row-infinite',
+      type: 'one-col-infinite',
     },
   });
 
   return (
     <>
-      <div className="w-full relative">
-        <div className="w-full box-border relative">
-          <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex pr-20">
-            {
-              aList?.map((item) => (
-                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-32">
-                  <div data-is-dnd-handler={true} className="cursor-move">
-                    :::
+      <div className="w-full grid grid-cols-2 gap-2">
+        <div>
+          <div className="w-full box-border relative">
+            <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex pb-24 flex-wrap">
+              {
+                aList?.map((item) => (
+                  <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                    <div data-is-dnd-handler={true} className="cursor-move">
+                      :::
+                    </div>
+                    <div>
+                      { item.name }
+                    </div>
                   </div>
-                  <div>
-                    { item.name }
-                  </div>
-                </div>
-              ))
-            }
+                ))
+              }
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="h-10"></div>
-
-      <div className="w-full relative">
-        <div className="w-full box-border relative">
-          <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex pr-20">
-            {
-              bList?.map((item) => (
-                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-32">
-                  <div data-is-dnd-handler={true} className="cursor-move">
-                    :::
+        <div>
+          <div className="w-full box-border relative">
+            <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex pb-24 flex-wrap">
+              {
+                bList?.map((item) => (
+                  <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                    <div data-is-dnd-handler={true} className="cursor-move">
+                      :::
+                    </div>
+                    <div>
+                      { item.name }
+                    </div>
                   </div>
-                  <div>
-                    { item.name }
-                  </div>
-                </div>
-              ))
-            }
+                ))
+              }
+            </div>
           </div>
         </div>
       </div>
