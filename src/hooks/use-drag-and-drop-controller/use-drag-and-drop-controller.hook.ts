@@ -3,6 +3,7 @@ import { IUseDragAndDropController } from "./use-drag-and-drop-controller.interf
 
 export function useDragAndDropController<T = any>(props: IUseDragAndDropController.Props<T>): IUseDragAndDropController.Controller<T> {
   const {
+    listDirection,
     onListsChange,
   } = props;
   const listMap = useRef(new Map<string, { list: T[], ref: RefObject<HTMLDivElement> }>());

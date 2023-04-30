@@ -1,12 +1,15 @@
 import { RefObject } from "react";
 
 export declare namespace IUseDragAndDropController {
+  export type ListDirection = 'vertical' | 'horizontal';
+
   export interface DragInfo<T = any> {
     name: string;
     item: T;
     targetIndex: number;
     targetItemElement: HTMLElement | null | undefined;
     targetItemElementRect?: DOMRect;
+    ref: RefObject<HTMLDivElement>;
     clientX: number;
     clientY: number;
     pageX: number;
@@ -33,6 +36,7 @@ export declare namespace IUseDragAndDropController {
   }
 
   export interface Props<T = any> {
+    listDirection: ListDirection;
     onListsChange: (map: Map<string, T[]>) => void;
   }
 }

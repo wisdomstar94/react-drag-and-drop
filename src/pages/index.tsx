@@ -27,6 +27,7 @@ export default function Home() {
   ]);
 
   const dndController = useDragAndDropController<Item>({
+    listDirection: 'vertical',
     onListsChange(map) {
       if (map.has('aList')) {
         setAList(map.get('aList'));
