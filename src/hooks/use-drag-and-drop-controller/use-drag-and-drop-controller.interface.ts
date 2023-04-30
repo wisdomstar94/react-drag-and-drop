@@ -1,7 +1,7 @@
 import { RefObject } from "react";
 
 export declare namespace IUseDragAndDropController {
-  export type ListDirection = 'vertical' | 'horizontal';
+  // export type ListDirection = 'vertical' | 'horizontal';
 
   export interface DragInfo<T = any> {
     name: string;
@@ -19,8 +19,14 @@ export declare namespace IUseDragAndDropController {
   export interface PushListInfo<T = any> {
     name: string;
     list?: T[];
+    gridColCount: number;
     ref: RefObject<HTMLDivElement>;
   }
+
+  // export interface ListMapValue<T = any> {
+  //   list: T[];
+  //   ref: RefObject<HTMLDivElement>;
+  // }
 
   export interface Controller<T = any> {
     getDragFromInfo: () => (DragInfo | undefined);
@@ -29,6 +35,12 @@ export declare namespace IUseDragAndDropController {
     setDragFromInfo: (dragInfo?: DragInfo) => void;
     setDragToInfo: (dragInfo?: DragInfo) => void;
 
+    getEventClientX: (event: MouseEvent | TouchEvent) => number;
+    getEventClientY: (event: MouseEvent | TouchEvent) => number;
+    getEventPageX: (event: MouseEvent | TouchEvent) => number;
+    getEventPageY: (event: MouseEvent | TouchEvent) => number;
+    isDragTargetThisRef: (ref: RefObject<HTMLDivElement>, event: MouseEvent | TouchEvent) => boolean;
+
     pushList: (info: PushListInfo) => void;
     isDragging: boolean;
     setIsDragging: (v: boolean) => void;
@@ -36,7 +48,6 @@ export declare namespace IUseDragAndDropController {
   }
 
   export interface Props<T = any> {
-    listDirection: ListDirection;
     onListsChange: (map: Map<string, T[]>) => void;
   }
 }

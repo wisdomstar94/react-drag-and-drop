@@ -4,6 +4,7 @@ export declare namespace IUseDragAndDrop {
   export interface Props<T> {
     name: string;
     list?: T[];
+    gridColCount: number;
     controller: IUseDragAndDropController.Controller;
   }
 }

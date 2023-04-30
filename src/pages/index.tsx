@@ -27,7 +27,6 @@ export default function Home() {
   ]);
 
   const dndController = useDragAndDropController<Item>({
-    listDirection: 'vertical',
     onListsChange(map) {
       if (map.has('aList')) {
         setAList(map.get('aList'));
@@ -42,12 +41,14 @@ export default function Home() {
     controller: dndController,
     name: 'aList',
     list: aList,
+    gridColCount: 1,
   });
 
   const bListDnD = useDragAndDrop({
     controller: dndController,
     name: 'bList',
     list: bList,
+    gridColCount: 1,
   });
 
   return (
@@ -55,7 +56,7 @@ export default function Home() {
       <div className="h-96"></div>
       <div className="w-full relative grid grid-cols-2 gap-2 box-border p-2">
         <div className="flex flex-wrap gap-2 items-start">
-          <div ref={aListDnD.ref} className="w-full box-border p-2 bg-blue-200">
+          <div ref={aListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14">
             {
               aList?.map((x) => {
                 return (
@@ -75,7 +76,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 items-start">
-          <div ref={bListDnD.ref} className="w-full box-border p-2 bg-blue-200">
+          <div ref={bListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14">
             {
               bList?.map((x) => {
                 return (
