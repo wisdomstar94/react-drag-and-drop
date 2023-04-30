@@ -72,6 +72,20 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     return false;
   }, []);
 
+  const isDnDHandlerThisController = useCallback((event: MouseEvent | TouchEvent) => {
+    const element = event.target as HTMLElement | null | undefined;
+    let currentElement = element;
+    for (let i = 0; i < 20; i++) {
+      for (const r of convertMapToArray(listMap.current).map(x => x.value?.ref)) {
+        if (r.current === currentElement) {
+          return true;
+        }
+      }
+      currentElement = currentElement?.parentElement;
+    }
+    return false;
+  }, [convertMapToArray]);
+
   const getCursorElements = useCallback((event: MouseEvent | TouchEvent) => {
     const [x, y] = [getEventClientX(event), getEventClientY(event)];
     return document.elementsFromPoint(x, y) as (HTMLElement[] | null | undefined);
@@ -261,6 +275,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
   const onPressStart = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isDnDHandler(event)) return;
+    if (!isDnDHandlerThisController(event)) return;
   
     const dragFirstStartFromInfo = getDragFirstStartFromInfo(event);
     const itemElement = getItemElement(dragFirstStartFromInfo?.info.ref, event);
@@ -278,7 +293,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       pageX: getEventPageX(event),
       pageY: getEventPageY(event),
     });
-  }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, setDragFromInfo]);
+  }, [getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
     if (target === undefined) return;
