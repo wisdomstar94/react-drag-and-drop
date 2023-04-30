@@ -26,6 +26,9 @@ export default function Home() {
         <li>
           <Link href="/test/fixed-col-count-grid">/test/fixed-col-count-grid</Link>
         </li>
+        <li>
+          <Link href="/test/zero-base">/test/zero-base</Link>
+        </li>
       </ul>
     </>
   );
