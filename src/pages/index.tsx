@@ -42,8 +42,8 @@ export default function Home() {
     name: 'aList',
     list: aList,
     listLayout: {
-      type: 'fixed-col-count-grid',
-      fixedColCount: 2,
+      type: 'one-row-infinite',
+      // fixedColCount: 2,
     },
   });
 
@@ -52,17 +52,17 @@ export default function Home() {
     name: 'bList',
     list: bList,
     listLayout: {
-      type: 'fixed-col-count-grid',
-      fixedColCount: 3,
+      type: 'one-row-infinite',
+      // fixedColCount: 3,
     },
   });
 
   return (
     <>
       <div className="h-96"></div>
-      <div className="w-full relative grid grid-cols-2 gap-2 box-border p-2">
+      <div className="w-full relative grid grid-cols-1 gap-2 box-border p-2">
         <div className="flex flex-wrap gap-2 items-start">
-          <div ref={aListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14 grid grid-cols-2">
+          <div ref={aListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14 flex">
             {
               aList?.map((x) => {
                 return (
@@ -82,7 +82,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 items-start">
-          <div ref={bListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14 grid grid-cols-3">
+          <div ref={bListDnD.ref} className="w-full box-border p-2 bg-blue-200 pb-14 flex">
             {
               bList?.map((x) => {
                 return (

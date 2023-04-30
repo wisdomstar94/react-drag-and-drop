@@ -324,6 +324,27 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
             }
           }
         } break;
+        case 'one-row-infinite': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+              continue;
+            }
+    
+            if (destinationIndex < dragStartIndex) {
+              if (i >= destinationIndex && i <= dragStartIndex) {
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            } else {
+              if (i >= dragStartIndex && i <= destinationIndex) {
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(-${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            }
+          }
+        } break;
         case 'fixed-col-count-grid': {
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
             if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
@@ -374,6 +395,17 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
             }
             if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
               (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+            } 
+          }
+        } break;
+        case 'one-row-infinite': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
+              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              continue;
+            }
+            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
+              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
             } 
           }
         } break;
