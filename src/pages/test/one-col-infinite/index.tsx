@@ -6,9 +6,9 @@ import { useState } from "react";
 export default function OneColInfiniteTestPage() {
   const [aList, setAList] = useState<ICommon.Item[] | undefined>([
     { name: 'a', value: 'a', },
-    { name: 'aaa', value: 'aaa', },
+    { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaa', },
     { name: 'aaaaa', value: 'aaaaa', },
-    { name: 'aaaaaaa', value: 'aaaaaaa', },
+    { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', },
   ]);
 
   const [bList, setBList] = useState<ICommon.Item[] | undefined>([
@@ -52,14 +52,14 @@ export default function OneColInfiniteTestPage() {
       <div className="w-full grid grid-cols-2 gap-2">
         <div>
           <div className="w-full box-border relative">
-            <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex pb-24 flex-wrap">
+            <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
                 aList?.map((item) => (
-                  <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
-                    <div data-is-dnd-handler={true} className="cursor-move">
+                  <div key={item.value} className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                    <div data-is-dnd-handler={true} className="cursor-move w-6">
                       :::
                     </div>
-                    <div>
+                    <div className="whitespace-pre-line break-words flex-1 block break-all">
                       { item.name }
                     </div>
                   </div>
@@ -71,14 +71,14 @@ export default function OneColInfiniteTestPage() {
 
         <div>
           <div className="w-full box-border relative">
-            <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex pb-24 flex-wrap">
+            <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
                 bList?.map((item) => (
-                  <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
-                    <div data-is-dnd-handler={true} className="cursor-move">
+                  <div key={item.value} className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                    <div data-is-dnd-handler={true} className="cursor-move w-6">
                       :::
                     </div>
-                    <div>
+                    <div className="whitespace-pre-line break-words flex-1 block break-all">
                       { item.name }
                     </div>
                   </div>

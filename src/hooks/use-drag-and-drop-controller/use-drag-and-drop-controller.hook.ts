@@ -174,8 +174,9 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     const [refAbsoluteX, refAbsoluteY] = getElementAbsoluteXY(ref.current);
     const [cursorX, cursorY] = [getEventPageX(event), getEventPageY(event)];
     
-    const targetElementHeight = (getDragFromInfo()?.targetItemElementRect?.height ?? 0);
-    const targetElementWidth = (getDragFromInfo()?.targetItemElementRect?.width ?? 0);
+    const dragFromInfo = getDragFromInfo();
+    const fromItemHeight = (dragFromInfo?.targetItemElementRect?.height ?? 0);
+    const fromItemWidth = (dragFromInfo?.targetItemElementRect?.width ?? 0);
     const itemTotalCount = (ref.current?.childElementCount ?? 0) + 1;
 
     const target = convertMapToArray(listMap.current).find(x => x.value.ref === ref);
@@ -183,8 +184,8 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     const fixedColCount = target?.value.listLayout.fixedColCount ?? 0;
     const fixedRowCount = target?.value.listLayout.fixedRowCount ?? 0;
 
-    const destinationRefItemWidth = ref.current?.firstElementChild?.getBoundingClientRect().width ?? targetElementWidth;
-    const destinationRefItemHeight = ref.current?.firstElementChild?.getBoundingClientRect().height ?? targetElementHeight;
+    const destinationRefItemWidth = ref.current?.firstElementChild?.getBoundingClientRect().width ?? fromItemWidth;
+    const destinationRefItemHeight = ref.current?.firstElementChild?.getBoundingClientRect().height ?? fromItemHeight;
 
     let yInfoMaxIndex = 0;
     let xInfoMaxIndex = 0;
@@ -226,22 +227,28 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     }
 
     const yInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
+    let stackedHeight = 0;
     for (let i = 0; i < yInfoMaxIndex; i++) {
-      const temp = refAbsoluteY + ((i + 1) * destinationRefItemHeight);
+      const height = ref.current?.children[i]?.getBoundingClientRect().height ?? 200;
+      stackedHeight += height;
+      const temp = refAbsoluteY + stackedHeight;
       if (cursorY < temp) {
         yInfo.index = i;
-        yInfo.rangeStart = temp - destinationRefItemHeight;
+        yInfo.rangeStart = temp - height;
         yInfo.rangeEnd = temp;
         break;
       }
     }
 
     const xInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
+    let stackedWidth = 0;
     for (let i = 0; i < xInfoMaxIndex; i++) {
-      const temp = refAbsoluteX + ((i + 1) * destinationRefItemWidth);
+      const width = ref.current?.children[i]?.getBoundingClientRect().width ?? 200;
+      stackedWidth += width;
+      const temp = refAbsoluteX + stackedWidth;
       if (cursorX < temp) {
         xInfo.index = i;
-        xInfo.rangeStart = temp - destinationRefItemWidth;
+        xInfo.rangeStart = temp - width;
         xInfo.rangeEnd = temp;
         break;
       }
@@ -321,6 +328,16 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       // if (item.value.ref.current.style.position === 'static') return;
       item.value.ref.current.style.zIndex = '1';
     });
+
+    const children = dragFirstStartFromInfo?.info.ref.current?.children ?? [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement; 
+      if (child === itemElement) {
+        child.style.zIndex = '2';
+        continue;
+      }
+      child.style.zIndex = '1';
+    }
   }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
@@ -360,6 +377,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     if (isSameFromDragRefEqualThisRef(ref)) {
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
+          const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
             if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
               continue;
@@ -367,13 +385,13 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     
             if (destinationIndex < dragStartIndex) {
               if (i >= destinationIndex && i <= dragStartIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${height}px)`;
               } else {
                 (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               }
             } else {
               if (i >= dragStartIndex && i <= destinationIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(-${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(-${height}px)`;
               } else {
                 (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               }
@@ -444,14 +462,15 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     } else {
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
-          console.log('@dragDestinationTargetIndexInfo', dragDestinationTargetIndexInfo.index);
+          const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            // const height = ref.current?.children[i]?.getBoundingClientRect().height ?? 0;
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
               (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               continue;
             }
             if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
-              (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+              (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${height}px)`;
             } 
           }
         } break;
@@ -550,6 +569,12 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       copyDestinationList.splice(dragFromInfo?.targetIndex ?? 0, 1);
       copyDestinationList.splice(dragToInfo?.targetIndex ?? 0, 0, dragFromInfo?.item);
       changeInfo.set(dragFromInfo?.name ?? '', copyDestinationList);
+    }
+
+    const children = dragFromInfo?.ref.current?.children ?? [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement; 
+      child.style.removeProperty('z-index');
     }
 
     onListsChange(changeInfo);
