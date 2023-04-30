@@ -5,7 +5,7 @@ export function useDragAndDrop<T>(props: IUseDragAndDrop.Props<T>) {
   const {
     name,
     list,
-    gridColCount,
+    listLayout,
     controller,
   } = props;
 
@@ -16,7 +16,7 @@ export function useDragAndDrop<T>(props: IUseDragAndDrop.Props<T>) {
       name,
       list,
       ref,
-      gridColCount,
+      listLayout,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [list]);

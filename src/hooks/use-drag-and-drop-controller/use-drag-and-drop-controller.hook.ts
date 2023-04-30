@@ -162,38 +162,100 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     
     const targetElementHeight = (getDragFromInfo()?.targetItemElementRect?.height ?? 0);
     const targetElementWidth = (getDragFromInfo()?.targetItemElementRect?.width ?? 0);
-    const maxIndex = (ref.current?.childElementCount ?? 0) + 1;
+    const itemTotalCount = (ref.current?.childElementCount ?? 0) + 1;
 
     const target = convertMapToArray(listMap.current).find(x => x.value.ref === ref);
-    const gridColCount = (target?.value.gridColCount ?? 0); 
+    const layoutType = target?.value.listLayout.type;
+    const fixedColCount = target?.value.listLayout.fixedColCount ?? 0;
+    const fixedRowCount = target?.value.listLayout.fixedRowCount ?? 0;
 
-    // x 축 계산
-    const xInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
-    for (let i = 0; i < gridColCount; i++) {
-      const temp = refAbsoluteX + ((i + 1) * targetElementWidth);
-      if (cursorX < temp) {
-        xInfo.index = i;
-        xInfo.rangeStart = temp - targetElementWidth;
-        xInfo.rangeEnd = temp;
-        break;
-      }
+    const destinationRefItemWidth = ref.current?.firstElementChild?.getBoundingClientRect().width ?? targetElementWidth;
+    const destinationRefItemHeight = ref.current?.firstElementChild?.getBoundingClientRect().height ?? targetElementHeight;
+
+    let yInfoMaxIndex = 0;
+    let xInfoMaxIndex = 0;
+
+    switch (layoutType) {
+      case 'one-col-infinite': {
+        /**
+         * [ 0 ]
+         * [ 1 ]
+         * [ 2 ]
+         * ...
+         */
+        yInfoMaxIndex = itemTotalCount;
+      } break;
+      case 'one-row-infinite': {
+        /**
+         * [ 0 ] [ 1 ] [ 2 ] ...
+         */
+        xInfoMaxIndex = itemTotalCount;
+      } break;
+      case 'fixed-col-count-grid': {
+        /**
+         * [ 0 ] [ 1 ]
+         * [ 2 ] [ 3 ] 
+         * [ 4 ] [ 5 ] 
+         * ... ...
+         */
+        yInfoMaxIndex = Math.ceil(itemTotalCount / 2);
+        xInfoMaxIndex = fixedColCount;
+      } break;
+      case 'fixed-row-count-grid': {
+        /**
+         * [ 0 ] [ 2 ] [ 4 ] [ 6 ] ...
+         * [ 1 ] [ 3 ] [ 5 ] [ 7 ] ...
+         */
+        yInfoMaxIndex = fixedRowCount;
+        xInfoMaxIndex = Math.ceil(itemTotalCount / 2);
+      } break;
     }
 
-    // y 축 계산
     const yInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
-    for (let i = 0; i < maxIndex; i++) {
-      const temp = refAbsoluteY + ((i + 1) * targetElementHeight);
+    for (let i = 0; i < yInfoMaxIndex; i++) {
+      const temp = refAbsoluteY + ((i + 1) * destinationRefItemHeight);
       if (cursorY < temp) {
         yInfo.index = i;
-        yInfo.rangeStart = temp - targetElementHeight;
+        yInfo.rangeStart = temp - destinationRefItemHeight;
         yInfo.rangeEnd = temp;
         break;
       }
     }
 
-    const destinationIndex = xInfo.index + (yInfo.index * gridColCount);
+    const xInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
+    for (let i = 0; i < xInfoMaxIndex; i++) {
+      const temp = refAbsoluteX + ((i + 1) * destinationRefItemWidth);
+      if (cursorX < temp) {
+        xInfo.index = i;
+        xInfo.rangeStart = temp - destinationRefItemWidth;
+        xInfo.rangeEnd = temp;
+        break;
+      }
+    }
+
+    let destinationIndex = 0;
+    switch (layoutType) {
+      case 'one-col-infinite': {
+        destinationIndex = yInfo.index;
+      } break;
+      case 'one-row-infinite': {
+        destinationIndex = xInfo.index;
+      } break;
+      case 'fixed-col-count-grid': {
+        destinationIndex = xInfo.index + (yInfo.index * fixedColCount);
+      } break;
+      case 'fixed-row-count-grid': {
+        destinationIndex = yInfo.index + (xInfo.index * fixedRowCount);
+      } break;
+    }
+
     return {
       index: destinationIndex,
+      layoutType,
+      fixedColCount,
+      fixedRowCount,
+      destinationRefItemWidth,
+      destinationRefItemHeight,
     };
   }, [convertMapToArray, getDragFromInfo, getElementAbsoluteXY, getEventPageX, getEventPageY]);
 
@@ -233,40 +295,109 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
     const dragFromInfo = getDragFromInfo();
-    const itemElementHeight = dragFromInfo?.targetItemElementRect?.height ?? 0;
+    // const itemElementWidth = dragFromInfo?.targetItemElementRect?.width ?? 0;
+    // const itemElementHeight = dragFromInfo?.targetItemElementRect?.height ?? 0;
     
     const destinationIndex = dragDestinationTargetIndexInfo?.index ?? 0;
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
 
     if (isSameFromDragRefEqualThisRef(ref)) {
-      for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-        if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
-          continue;
-        }
-
-        if (destinationIndex < dragStartIndex) {
-          if (i >= destinationIndex && i <= dragStartIndex) {
-            (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${itemElementHeight}px)`;
-          } else {
-            (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+      switch (dragDestinationTargetIndexInfo.layoutType) {
+        case 'one-col-infinite': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+              continue;
+            }
+    
+            if (destinationIndex < dragStartIndex) {
+              if (i >= destinationIndex && i <= dragStartIndex) {
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            } else {
+              if (i >= dragStartIndex && i <= destinationIndex) {
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(-${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            }
           }
-        } else {
-          if (i >= dragStartIndex && i <= destinationIndex) {
-            (ref.current?.children[i] as HTMLElement).style.transform = `translateY(-${itemElementHeight}px)`;
-          } else {
-            (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+        } break;
+        case 'fixed-col-count-grid': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+              continue;
+            }
+    
+            if (destinationIndex < dragStartIndex) {
+              if (i >= destinationIndex && i <= dragStartIndex) {
+                let x = 0;
+                let y = 0;
+                const virtualIndex = i + 1;
+                if (virtualIndex % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                  x = -((i % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                  y = dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                } else {
+                  x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                }
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            } else {
+              if (i >= dragStartIndex && i <= destinationIndex) {
+                let x = 0;
+                let y = 0;
+                const virtualIndex = i - 1;
+                if (i % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                  x = ((virtualIndex % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                  y = -dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                } else {
+                  x = -dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                }
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+              } else {
+                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              }
+            }
           }
-        }
+        } break;
       }
     } else {
-      for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-        if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
-          (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
-          continue;
-        }
-        if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
-          (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${itemElementHeight}px)`;
-        } 
+      switch (dragDestinationTargetIndexInfo.layoutType) {
+        case 'one-col-infinite': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
+              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              continue;
+            }
+            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
+              (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${dragDestinationTargetIndexInfo.destinationRefItemHeight}px)`;
+            } 
+          }
+        } break;
+        case 'fixed-col-count-grid': {
+          for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
+              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              continue;
+            }
+            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
+              const virtualIndex = i + 1; // ex. index = 3, virtual index = 4
+              let x = 0;
+              let y = 0;
+              if (virtualIndex % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                x = -((i % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                y = dragDestinationTargetIndexInfo.destinationRefItemHeight;
+              } else {
+                x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
+              }
+
+              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+            } 
+          }
+        } break;
       }
     }
   }, [getDragDestinationTargetIndexInfo, getDragFromInfo, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef]);

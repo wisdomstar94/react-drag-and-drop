@@ -1,4 +1,5 @@
 import { RefObject } from "react";
+import { IUseDragAndDrop } from "../use-drag-and-drop/use-drag-and-drop.interface";
 
 export declare namespace IUseDragAndDropController {
   // export type ListDirection = 'vertical' | 'horizontal';
@@ -19,7 +20,7 @@ export declare namespace IUseDragAndDropController {
   export interface PushListInfo<T = any> {
     name: string;
     list?: T[];
-    gridColCount: number;
+    listLayout: IUseDragAndDrop.ListLayout;
     ref: RefObject<HTMLDivElement>;
   }
 
