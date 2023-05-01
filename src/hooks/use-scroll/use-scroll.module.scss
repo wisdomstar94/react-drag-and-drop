@@ -1,0 +1,22 @@
+.html-window-scroll-deny {
+  // width: 100%;
+  // position: fixed;
+  touch-action: none;
+  overscroll-behavior-y: none;
+}
+
+.body-window-scroll-deny {
+  /* width: calc(100% - 16px); */
+  // width: 100%;
+  // overflow: hidden !important;
+  touch-action: none;
+  overflow: hidden;
+  // position: fixed;
+  // right: 0;
+  overscroll-behavior-y: none;
+}
+
+.scroll-target-scroll-block {
+  overflow: hidden !important;
+  touch-action: none;
+}

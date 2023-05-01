@@ -1,6 +1,7 @@
 import { RefObject, createRef, useCallback, useRef, useState } from "react";
 import { IUseDragAndDropController } from "./use-drag-and-drop-controller.interface";
 import useAddEventListener from "../use-add-event-listener/use-add-event-listener.hook";
+import { useScroll } from "../use-scroll/use-scroll.hook";
 
 export function useDragAndDropController<T = any>(props: IUseDragAndDropController.Props<T>): IUseDragAndDropController.Controller<T> {
   const {
@@ -13,6 +14,8 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   const dragFromInfo = useRef<IUseDragAndDropController.DragInfo>();
   const dragToInfo = useRef<IUseDragAndDropController.DragInfo>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  const scroll = useScroll();
   
   const convertMapToArray = useCallback(function<T, K>(map: Map<T, K>) {
     return Array.from(map, function (entry) {
@@ -27,27 +30,11 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     return [scrollLeft + (rect?.left ?? 0), scrollTop + (rect?.top ?? 0)];
   }, []);
 
-  const getEventClientX = useCallback((event: MouseEvent | TouchEvent) => {
-    return event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
-  }, []);
-
-  const getEventClientY = useCallback((event: MouseEvent | TouchEvent) => {
-    return event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
-  }, []);
-
-  const getEventPageX = useCallback((event: MouseEvent | TouchEvent) => {
-    return event instanceof MouseEvent ? event.pageX : event.touches[0].pageX;
-  }, []);
-
-  const getEventPageY = useCallback((event: MouseEvent | TouchEvent) => {
-    return event instanceof MouseEvent ? event.pageY : event.touches[0].pageY;
-  }, []);
-
   const getEventCursorAbsoluteXY = useCallback((event: MouseEvent | TouchEvent) => {
-    return [getEventPageX(event), getEventPageY(event)];
-  }, [getEventPageX, getEventPageY]);
+    return [event instanceof MouseEvent ? event.pageX : event.touches[0].pageX, event instanceof MouseEvent ? event.pageY : event.touches[0].pageY];
+  }, []);
 
-  const getDragFirstStartFromInfo = useCallback((event: MouseEvent | TouchEvent) => {
+  const getDragFirstStartFromInfo = useCallback((event: PointerEvent) => {
     const element = event.target as (HTMLElement | null | undefined);
     let currentElement = element;
     for (let i = 0; i < 20; i++) {
@@ -63,7 +50,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     return undefined;
   }, [convertMapToArray]);
 
-  const isDnDHandler = useCallback((event: MouseEvent | TouchEvent) => {
+  const isDnDHandler = useCallback((event: PointerEvent) => {
     const element = event.target as HTMLElement | null | undefined;
     let currentElement = element;
     for (let i = 0; i < 20; i++) {
@@ -75,7 +62,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     return false;
   }, []);
 
-  const isDnDHandlerThisController = useCallback((event: MouseEvent | TouchEvent) => {
+  const isDnDHandlerThisController = useCallback((event: PointerEvent) => {
     const element = event.target as HTMLElement | null | undefined;
     let currentElement = element;
     for (let i = 0; i < 20; i++) {
@@ -90,9 +77,9 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   }, [convertMapToArray]);
 
   const getCursorElements = useCallback((event: MouseEvent | TouchEvent) => {
-    const [x, y] = [getEventClientX(event), getEventClientY(event)];
+    const [x, y] = [event instanceof MouseEvent ? event.clientX : event.touches[0].clientX, event instanceof MouseEvent ? event.clientY : event.touches[0].clientY];
     return document.elementsFromPoint(x, y) as (HTMLElement[] | null | undefined);
-  }, [getEventClientX, getEventClientY]);
+  }, []);
 
   const isDragTargetThisRef = useCallback((ref: RefObject<HTMLDivElement>, event: MouseEvent | TouchEvent) => {
     const cursorElements = getCursorElements(event);
@@ -140,16 +127,12 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     listMap.current.set(info.name, info);
   }, []);
 
-  const finallyCalculateItems = useCallback(() => {
-
-  }, []);
-
   const isSameFromDragRefEqualThisRef = useCallback((ref: RefObject<HTMLDivElement>) => {
     const dragFromInfo = getDragFromInfo();
     return dragFromInfo?.ref.current === ref.current;
   }, [getDragFromInfo]);
 
-  const getItemElement = useCallback((ref: RefObject<HTMLElement> | undefined, event: MouseEvent | TouchEvent) => {
+  const getItemElement = useCallback((ref: RefObject<HTMLElement> | undefined, event: PointerEvent) => {
     const element = event.target as HTMLElement | null | undefined;
     let prevElement = element;
     let currentElement = element;
@@ -174,10 +157,18 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   }, []);
 
   const getDragDestinationTargetIndexInfo = useCallback((ref: RefObject<HTMLDivElement>, event: MouseEvent | TouchEvent) => {
-    const [refAbsoluteX, refAbsoluteY] = getElementAbsoluteXY(ref.current);
-    const [cursorX, cursorY] = [getEventPageX(event), getEventPageY(event)];
-    
     const dragFromInfo = getDragFromInfo();
+    const [refAbsoluteX, refAbsoluteY] = getElementAbsoluteXY(ref.current);
+    // const [cursorX, cursorY] = [
+    //   (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX), 
+    //   (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY),
+    // ];
+    const [cursorX, cursorY] = [
+      (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.offsetX ?? 0), 
+      (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.offsetY ?? 0),
+    ];
+    console.log({ cursorX, cursorY });
+    
     const fromItemHeight = (dragFromInfo?.targetItemElementRect?.height ?? 0);
     const fromItemWidth = (dragFromInfo?.targetItemElementRect?.width ?? 0);
     const itemTotalCount = (ref.current?.childElementCount ?? 0) + 1;
@@ -298,15 +289,19 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       destinationRefItemWidth,
       destinationRefItemHeight,
     };
-  }, [convertMapToArray, getDragFromInfo, getElementAbsoluteXY, getEventPageX, getEventPageY]);
+  }, [convertMapToArray, getDragFromInfo, getElementAbsoluteXY]);
 
-  const onPressStart = useCallback((event: MouseEvent | TouchEvent) => {
+  const onPressStart = useCallback((event: PointerEvent) => {
     if (!isDnDHandler(event)) return;
     if (!isDnDHandlerThisController(event)) return;
   
     const dragFirstStartFromInfo = getDragFirstStartFromInfo(event);
     const itemElement = getItemElement(dragFirstStartFromInfo?.info.ref, event);
     const index = getElementIndex(itemElement?.parentElement, itemElement);
+  
+    // console.log('@event', event);
+
+    scroll.denyScroll();
 
     const dragInfo: IUseDragAndDropController.DragInfo =  {
       name: dragFirstStartFromInfo?.name ?? '',
@@ -315,11 +310,15 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       targetItemElement: itemElement,
       targetItemElementRect: itemElement?.getBoundingClientRect(),
       ref: dragFirstStartFromInfo?.info.ref ?? createRef(),
-      clientX: getEventClientX(event),
-      clientY: getEventClientY(event),
-      pageX: getEventPageX(event),
-      pageY: getEventPageY(event),
+      clientX: event.clientX,
+      clientY: event.clientY,
+      pageX: event.pageX,
+      pageY: event.pageY,
+      offsetX: event.offsetX,
+      offsetY: event.offsetY,
     };
+
+    // console.log('dragInfo', dragInfo);
 
     setIsDragging(true);
     setDragFromInfo(dragInfo);
@@ -359,7 +358,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     if (typeof onStartDrag === 'function') {
       onStartDrag(dragInfo);
     }
-  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, onStartDrag, setDragFromInfo, setDragToInfo]);
+  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisController, onStartDrag, scroll, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
     if (target === undefined) return;
@@ -378,6 +377,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       onDestinationActiveListName(target.name);  
     }
 
+    console.log('...?');
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
     const dragFromInfo = getDragFromInfo();
     // const itemElementWidth = dragFromInfo?.targetItemElementRect?.width ?? 0;
@@ -393,10 +393,12 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       targetItemElement: null,
       targetItemElementRect: undefined,
       ref: target.ref,
-      clientX: getEventClientX(event),
-      clientY: getEventClientY(event),
-      pageX: getEventPageX(event),
-      pageY: getEventPageY(event),
+      clientX: event instanceof MouseEvent ? event.clientX : event.touches[0].clientX,
+      clientY: event instanceof MouseEvent ? event.clientY : event.touches[0].clientY,
+      pageX: event instanceof MouseEvent ? event.pageX : event.touches[0].pageX,
+      pageY: event instanceof MouseEvent ? event.pageY : event.touches[0].pageY,
+      offsetX: 0,
+      offsetY: 0,
     });
 
     if (isSameFromDragRefEqualThisRef(ref)) {
@@ -539,14 +541,22 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
         } break;
       }
     }
-  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, getEventClientX, getEventClientY, getEventPageX, getEventPageY, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
+  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
+    // console.log('....onDragging');
     if (!isDragging) return;
 
     const dragFromInfo = getDragFromInfo();
-    const diffX = getEventPageX(event) - (dragFromInfo?.pageX ?? 0);
-    const diffY = getEventPageY(event) - (dragFromInfo?.pageY ?? 0);
+    // const diffX = event.pageX - (dragFromInfo?.pageX ?? 0);
+    // const diffY = event.pageY - (dragFromInfo?.pageY ?? 0);
+
+    // const currentCursorX = 
+
+    const diffX = ((event instanceof MouseEvent) ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.pageX ?? 0);
+    const diffY = ((event instanceof MouseEvent) ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.pageY ?? 0);
+
+    console.log({ diffX, diffY });
 
     const targetItemElement = dragFromInfo?.targetItemElement;
     if (targetItemElement !== undefined && targetItemElement !== null) {
@@ -560,7 +570,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       return isInclude;
     });
     onMovingTargetRef(target?.value, event);
-  }, [convertMapToArray, getDragFromInfo, getEventCursorAbsoluteXY, getEventPageX, getEventPageY, getRefAbsolutePointRange, isDragging, isIncludePointRangeTargetCursor, onMovingTargetRef]);
+  }, [convertMapToArray, getDragFromInfo, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isDragging, isIncludePointRangeTargetCursor, onMovingTargetRef]);
 
   const onPressEnd = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
@@ -608,25 +618,32 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       child.style.removeProperty('z-index');
     }
 
+    // document.querySelector('html')!.style.removeProperty('touch-action');
+    // document.querySelector('html')!.style.removeProperty('pointer-events');
+    // document.body.style.removeProperty('touch-action');
+    // document.body.style.removeProperty('pointer-events');
+
     onListsChange(changeInfo);
     setIsDragging(false);
+
+    scroll.allowScroll();
 
     if (typeof onEndDrag === 'function') {
       onEndDrag(dragFromInfo, dragToInfo);
     }
-  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onEndDrag, onListsChange]);
+  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onEndDrag, onListsChange, scroll]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'mousedown',
+    eventName: 'pointerdown',
     eventListener: onPressStart,
   });
 
-  useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'touchstart',
-    eventListener: onPressStart,
-  });
+  // useAddEventListener({
+  //   targetElementRef: { current: typeof window !== 'undefined' ? window : null },
+  //   eventName: 'touchstart',
+  //   eventListener: onPressStart,
+  // });
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
@@ -653,21 +670,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   });
 
   return {
-    getDragFromInfo,
-    getDragToInfo,
-
-    setDragFromInfo,
-    setDragToInfo,
-
-    getEventClientX,
-    getEventClientY,
-    getEventPageX,
-    getEventPageY,
-    isDragTargetThisRef,
-
     pushList,
     isDragging,
-    setIsDragging,
-    finallyCalculateItems,
   };
 }

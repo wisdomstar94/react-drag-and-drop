@@ -32,6 +32,9 @@ export default function Home() {
         <li>
           <Link href="/test/drag-effect">/test/drag-effect</Link>
         </li>
+        <li>
+          <Link href="/test/item-self-dnd-hanlder">/test/item-self-dnd-hanlder</Link>
+        </li>
       </ul>
     </>
   );
