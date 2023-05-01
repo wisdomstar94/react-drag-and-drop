@@ -5,6 +5,9 @@ import useAddEventListener from "../use-add-event-listener/use-add-event-listene
 export function useDragAndDropController<T = any>(props: IUseDragAndDropController.Props<T>): IUseDragAndDropController.Controller<T> {
   const {
     onListsChange,
+    onDestinationActiveListName,
+    onStartDrag,
+    onEndDrag,
   } = props;
   const listMap = useRef(new Map<string, IUseDragAndDropController.PushListInfo>());
   const dragFromInfo = useRef<IUseDragAndDropController.DragInfo>();
@@ -304,8 +307,8 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     const dragFirstStartFromInfo = getDragFirstStartFromInfo(event);
     const itemElement = getItemElement(dragFirstStartFromInfo?.info.ref, event);
     const index = getElementIndex(itemElement?.parentElement, itemElement);
-    setIsDragging(true);
-    setDragFromInfo({
+
+    const dragInfo: IUseDragAndDropController.DragInfo =  {
       name: dragFirstStartFromInfo?.name ?? '',
       item: dragFirstStartFromInfo?.info.list?.at(index),
       targetIndex: index,
@@ -316,18 +319,15 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       clientY: getEventClientY(event),
       pageX: getEventPageX(event),
       pageY: getEventPageY(event),
-    });
+    };
+
+    setIsDragging(true);
+    setDragFromInfo(dragInfo);
     setDragToInfo({
-      name: dragFirstStartFromInfo?.name ?? '',
-      item: dragFirstStartFromInfo?.info.list?.at(index),
-      targetIndex: index,
+      ...dragInfo,
       targetItemElement: null,
       targetItemElementRect: undefined,
       ref: dragFirstStartFromInfo?.info.ref ?? createRef(),
-      clientX: getEventClientX(event),
-      clientY: getEventClientY(event),
-      pageX: getEventPageX(event),
-      pageY: getEventPageY(event),
     });
 
     convertMapToArray(listMap.current).forEach((item) => {
@@ -355,7 +355,11 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       }
       child.style.zIndex = '1';
     }
-  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, setDragFromInfo, setDragToInfo]);
+
+    if (typeof onStartDrag === 'function') {
+      onStartDrag(dragInfo);
+    }
+  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getEventClientX, getEventClientY, getEventPageX, getEventPageY, getItemElement, isDnDHandler, isDnDHandlerThisController, onStartDrag, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
     if (target === undefined) return;
@@ -368,6 +372,10 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
         (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
       }
       return;
+    }
+
+    if (typeof onDestinationActiveListName === 'function') {
+      onDestinationActiveListName(target.name);  
     }
 
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
@@ -396,21 +404,22 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+            const child = (ref.current?.children[i] as HTMLElement);
+            if (child === dragFromInfo?.targetItemElement) {
               continue;
             }
     
             if (destinationIndex < dragStartIndex) {
               if (i >= destinationIndex && i <= dragStartIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${height}px)`;
+                child.style.transform = `translateY(${height}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             } else {
               if (i >= dragStartIndex && i <= destinationIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateY(-${height}px)`;
+                child.style.transform = `translateY(-${height}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             }
           }
@@ -418,28 +427,30 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
         case 'one-row-infinite': {
           const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+            const child = (ref.current?.children[i] as HTMLElement);
+            if (child === dragFromInfo?.targetItemElement) {
               continue;
             }
     
             if (destinationIndex < dragStartIndex) {
               if (i >= destinationIndex && i <= dragStartIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${width}px)`;
+                child.style.transform = `translateX(${width}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             } else {
               if (i >= dragStartIndex && i <= destinationIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(-${width}px)`;
+                child.style.transform = `translateX(-${width}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             }
           }
         } break;
         case 'fixed-col-count-grid': {
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-            if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
+            const child = (ref.current?.children[i] as HTMLElement);
+            if (child === dragFromInfo?.targetItemElement) {
               continue;
             }
     
@@ -454,9 +465,9 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
                 } else {
                   x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
                 }
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+                child.style.transform = `translateX(${x}px) translateY(${y}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             } else {
               if (i >= dragStartIndex && i <= destinationIndex) {
@@ -469,9 +480,9 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
                 } else {
                   x = -dragDestinationTargetIndexInfo.destinationRefItemWidth;
                 }
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+                child.style.transform = `translateX(${x}px) translateY(${y}px)`;
               } else {
-                (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+                child.style.removeProperty('transform');
               }
             }
           }
@@ -482,35 +493,37 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
-            // const height = ref.current?.children[i]?.getBoundingClientRect().height ?? 0;
+            const child = (ref.current?.children[i] as HTMLElement);
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
-              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              child.style.removeProperty('transform');
               continue;
             }
-            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
-              (ref.current?.children[i] as HTMLElement).style.transform = `translateY(${height}px)`;
+            if (child !== undefined && child !== null) {
+              child.style.transform = `translateY(${height}px)`;
             } 
           }
         } break;
         case 'one-row-infinite': {
           const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            const child = (ref.current?.children[i] as HTMLElement);
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
-              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              child.style.removeProperty('transform');
               continue;
             }
-            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
-              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${width}px)`;
+            if (child !== undefined && child !== null) {
+              child.style.transform = `translateX(${width}px)`;
             } 
           }
         } break;
         case 'fixed-col-count-grid': {
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
+            const child = (ref.current?.children[i] as HTMLElement);
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
-              (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
+              child.style.removeProperty('transform');
               continue;
             }
-            if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
+            if (child !== undefined && child !== null) {
               const virtualIndex = i + 1; // ex. index = 3, virtual index = 4
               let x = 0;
               let y = 0;
@@ -520,14 +533,13 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
               } else {
                 x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
               }
-
-              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${x}px) translateY(${y}px)`;
+              child.style.transform = `translateX(${x}px) translateY(${y}px)`;
             } 
           }
         } break;
       }
     }
-  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, getEventClientX, getEventClientY, getEventPageX, getEventPageY, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef, setDragToInfo]);
+  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, getEventClientX, getEventClientY, getEventPageX, getEventPageY, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
@@ -598,7 +610,11 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     onListsChange(changeInfo);
     setIsDragging(false);
-  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onListsChange]);
+
+    if (typeof onEndDrag === 'function') {
+      onEndDrag(dragFromInfo, dragToInfo);
+    }
+  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onEndDrag, onListsChange]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },

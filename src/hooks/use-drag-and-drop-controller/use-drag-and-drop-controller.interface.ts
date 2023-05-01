@@ -50,5 +50,8 @@ export declare namespace IUseDragAndDropController {
 
   export interface Props<T = any> {
     onListsChange: (map: Map<string, T[]>) => void;
+    onDestinationActiveListName?: (name: string) => void;
+    onStartDrag?: (dragFromInfo: DragInfo) => void;
+    onEndDrag?: (dragFromInfo?: DragInfo, dragToInfo?: DragInfo) => void;
   }
 }
