@@ -1,7 +1,7 @@
 import { RefObject, useCallback, useRef } from "react";
-import styles from './use-scroll.module.scss';
+import styles from './use-body.module.scss';
 
-export function useScroll(ref?: RefObject<HTMLElement>) {
+export function useBody(ref?: RefObject<HTMLElement>) {
   const latestScrollYRef = useRef<number>(0);
   const latestScrollXRef = useRef<number>(0);
 
@@ -46,8 +46,18 @@ export function useScroll(ref?: RefObject<HTMLElement>) {
     }
   }, [ref]);
 
+  const denyTextDrag = useCallback(() => {
+    document.body.classList.add(styles['no-text-drag']);
+  }, []);
+
+  const allowTextDrag = useCallback(() => {
+    document.body.classList.remove(styles['no-text-drag']);
+  }, []);
+
   return {
     denyScroll,
     allowScroll,
+    denyTextDrag,
+    allowTextDrag,
   };
 }

@@ -1,7 +1,7 @@
 import { RefObject, createRef, useCallback, useRef, useState } from "react";
 import { IUseDragAndDropController } from "./use-drag-and-drop-controller.interface";
 import useAddEventListener from "../use-add-event-listener/use-add-event-listener.hook";
-import { useScroll } from "../use-scroll/use-scroll.hook";
+import { useBody } from "../use-body/use-body.hook";
 
 export function useDragAndDropController<T = any>(props: IUseDragAndDropController.Props<T>): IUseDragAndDropController.Controller<T> {
   const {
@@ -15,8 +15,12 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   const dragToInfo = useRef<IUseDragAndDropController.DragInfo>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const scroll = useScroll();
+  const body = useBody();
   
+  const isMobile = useCallback(() => {
+    return /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
+  }, []);
+
   const convertMapToArray = useCallback(function<T, K>(map: Map<T, K>) {
     return Array.from(map, function (entry) {
       return { key: entry[0], value: entry[1] };
@@ -301,7 +305,10 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
   
     // console.log('@event', event);
 
-    scroll.denyScroll();
+    if (isMobile()) {
+      body.denyScroll();
+      body.denyTextDrag();
+    }
 
     const dragInfo: IUseDragAndDropController.DragInfo =  {
       name: dragFirstStartFromInfo?.name ?? '',
@@ -358,7 +365,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     if (typeof onStartDrag === 'function') {
       onStartDrag(dragInfo);
     }
-  }, [convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisController, onStartDrag, scroll, setDragFromInfo, setDragToInfo]);
+  }, [body, convertMapToArray, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisController, isMobile, onStartDrag, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((target: IUseDragAndDropController.PushListInfo | undefined, event: MouseEvent | TouchEvent) => {
     if (target === undefined) return;
@@ -626,12 +633,15 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     onListsChange(changeInfo);
     setIsDragging(false);
 
-    scroll.allowScroll();
+    if (isMobile()) {
+      body.allowScroll();
+      body.allowTextDrag();
+    }
 
     if (typeof onEndDrag === 'function') {
       onEndDrag(dragFromInfo, dragToInfo);
     }
-  }, [convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, onEndDrag, onListsChange, scroll]);
+  }, [body, convertMapToArray, getDragFromInfo, getDragToInfo, isDragging, isMobile, onEndDrag, onListsChange]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
