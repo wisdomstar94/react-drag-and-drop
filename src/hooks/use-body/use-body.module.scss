@@ -17,8 +17,11 @@
 }
 
 .scroll-target-scroll-block {
-  overflow: hidden !important;
+  // overflow: hidden !important;
+  // touch-action: none;
   touch-action: none;
+  overflow: hidden;
+  overscroll-behavior-y: none;
 }
 
 .no-text-drag {
