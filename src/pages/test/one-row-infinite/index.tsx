@@ -5,16 +5,16 @@ import { useState } from "react";
 
 export default function OneRowInfiniteTestPage() {
   const [aList, setAList] = useState<ICommon.Item[] | undefined>([
-    { name: 'a', value: 'a', },
+    { name: 'aaaaaaaaaaaaaaa', value: 'a', },
     { name: 'aaa', value: 'aaa', },
-    { name: 'aaaaa', value: 'aaaaa', },
+    { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaaaa', },
     { name: 'aaaaaaa', value: 'aaaaaaa', },
   ]);
 
   const [bList, setBList] = useState<ICommon.Item[] | undefined>([
-    { name: 'b', value: 'b', },
+    { name: 'bbbbbbbbbbbbbbb', value: 'b', },
     { name: 'bbb', value: 'bbb', },
-    { name: 'bbbbb', value: 'bbbbb', },
+    { name: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', value: 'bbbbb', },
     { name: 'bbbbbbb', value: 'bbbbbbb', },
   ]);
 
@@ -54,7 +54,7 @@ export default function OneRowInfiniteTestPage() {
           <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex pr-20">
             {
               aList?.map((item) => (
-                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-32">
+                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white">
                   <div data-is-dnd-handler={true} className="cursor-move">
                     :::
                   </div>
@@ -75,7 +75,7 @@ export default function OneRowInfiniteTestPage() {
           <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex pr-20">
             {
               bList?.map((item) => (
-                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-32">
+                <div key={item.value} className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white">
                   <div data-is-dnd-handler={true} className="cursor-move">
                     :::
                   </div>

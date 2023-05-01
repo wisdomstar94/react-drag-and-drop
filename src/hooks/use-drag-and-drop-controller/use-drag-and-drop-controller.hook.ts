@@ -189,6 +189,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     let yInfoMaxIndex = 0;
     let xInfoMaxIndex = 0;
+    let isUseNextIndexItem = false;
 
     switch (layoutType) {
       case 'one-col-infinite': {
@@ -228,8 +229,16 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     const yInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
     let stackedHeight = 0;
+    isUseNextIndexItem = false;
     for (let i = 0; i < yInfoMaxIndex; i++) {
-      const height = ref.current?.children[i]?.getBoundingClientRect().height ?? 200;
+      let target = ref.current?.children[i];
+      if (target === dragFromInfo?.targetItemElement) {
+        isUseNextIndexItem = true;
+      }
+      if (isUseNextIndexItem) {
+        target = ref.current?.children[i + 1];
+      }
+      const height = target?.getBoundingClientRect().height ?? 200;
       stackedHeight += height;
       const temp = refAbsoluteY + stackedHeight;
       if (cursorY < temp) {
@@ -242,8 +251,16 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
 
     const xInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
     let stackedWidth = 0;
+    isUseNextIndexItem = false;
     for (let i = 0; i < xInfoMaxIndex; i++) {
-      const width = ref.current?.children[i]?.getBoundingClientRect().width ?? 200;
+      let target = ref.current?.children[i];
+      if (target === dragFromInfo?.targetItemElement) {
+        isUseNextIndexItem = true;
+      }
+      if (isUseNextIndexItem) {
+        target = ref.current?.children[i + 1];
+      }
+      const width = target?.getBoundingClientRect().width ?? 200;
       stackedWidth += width;
       const temp = refAbsoluteX + stackedWidth;
       if (cursorX < temp) {
@@ -399,6 +416,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
           }
         } break;
         case 'one-row-infinite': {
+          const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
             if ((ref.current?.children[i] as HTMLElement) === dragFromInfo?.targetItemElement) {
               continue;
@@ -406,13 +424,13 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
     
             if (destinationIndex < dragStartIndex) {
               if (i >= destinationIndex && i <= dragStartIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${width}px)`;
               } else {
                 (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               }
             } else {
               if (i >= dragStartIndex && i <= destinationIndex) {
-                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(-${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
+                (ref.current?.children[i] as HTMLElement).style.transform = `translateX(-${width}px)`;
               } else {
                 (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               }
@@ -475,13 +493,14 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
           }
         } break;
         case 'one-row-infinite': {
+          const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
           for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
             if (i < (dragDestinationTargetIndexInfo?.index ?? 999999)) {
               (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
               continue;
             }
             if ((ref.current?.children[i] as HTMLElement) !== undefined && (ref.current?.children[i] as HTMLElement) !== null) {
-              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${dragDestinationTargetIndexInfo.destinationRefItemWidth}px)`;
+              (ref.current?.children[i] as HTMLElement).style.transform = `translateX(${width}px)`;
             } 
           }
         } break;
