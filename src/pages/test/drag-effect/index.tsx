@@ -2,8 +2,9 @@ import { useDragAndDropController } from "@/hooks/use-drag-and-drop-controller/u
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
 import { ICommon } from "@/interfaces/common.interface";
 import { useState } from "react";
+import styles from './index.module.scss';
 
-export default function FixedColCountGridTestPage() {
+export default function DragEffectTestPage() {
   const [aList, setAList] = useState<ICommon.Item[] | undefined>([
     { name: 'a', value: 'a', },
     { name: 'aaa', value: 'aaa', },
@@ -26,6 +27,17 @@ export default function FixedColCountGridTestPage() {
       if (map.has('bList')) {
         setBList(map.get('bList'));
       }
+    },
+    onDestinationActiveListName(name) {
+      console.log('@name', name);
+    },
+    onStartDrag(dragFromInfo) {
+      const fromItemElement = dragFromInfo?.targetItemElement;
+      fromItemElement?.firstElementChild?.classList.add(styles['drag-from-item-effect']);
+    },
+    onEndDrag(dragFromInfo, dragToInfo) {
+      const fromItemElement = dragFromInfo?.targetItemElement;
+      fromItemElement?.firstElementChild?.classList.remove(styles['drag-from-item-effect']);
     },
   });
 

@@ -29,6 +29,9 @@ export default function Home() {
         <li>
           <Link href="/test/zero-base">/test/zero-base</Link>
         </li>
+        <li>
+          <Link href="/test/drag-effect">/test/drag-effect</Link>
+        </li>
       </ul>
     </>
   );
