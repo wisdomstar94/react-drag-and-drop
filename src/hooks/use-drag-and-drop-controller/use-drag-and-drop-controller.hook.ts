@@ -227,7 +227,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       // } break;
     }
 
-    const yInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
+    const yInfo = { index: 999999999, rangeStart: 0, rangeEnd: 0 };
     let stackedHeight = 0;
     isUseNextIndexItem = false;
     for (let i = 0; i < yInfoMaxIndex; i++) {
@@ -249,7 +249,7 @@ export function useDragAndDropController<T = any>(props: IUseDragAndDropControll
       }
     }
 
-    const xInfo = { index: 0, rangeStart: 0, rangeEnd: 0 };
+    const xInfo = { index: 999999999, rangeStart: 0, rangeEnd: 0 };
     let stackedWidth = 0;
     isUseNextIndexItem = false;
     for (let i = 0; i < xInfoMaxIndex; i++) {
