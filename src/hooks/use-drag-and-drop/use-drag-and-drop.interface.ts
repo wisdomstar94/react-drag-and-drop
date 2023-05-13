@@ -5,7 +5,7 @@ export declare namespace IUseDragAndDrop {
     'one-row-infinite' | 
     'one-col-infinite' | 
     'fixed-col-count-grid' | 
-    // 'fixed-row-count-grid' // 해당 하는 경우는 없을 것으로 예상됨.
+    // 'fixed-row-count-grid' // 해당 하는 경우는 없을 것으로 예상되지만, 주석 처리만 해놓음.
     ''
   ;
 
@@ -35,10 +35,6 @@ export declare namespace IUseDragAndDrop {
     listLayout: ListLayout;
     ref: RefObject<K>;
   }
-
-  // export interface Lists<T, K extends HTMLElement> {
-  //   [key: string]: List<T, K>;
-  // }
 
   export interface Props<T, K extends HTMLElement, E extends string> {
     lists: [E, List<T, K>][];
