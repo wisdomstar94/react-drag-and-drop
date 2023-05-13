@@ -39,9 +39,9 @@ export default function ItemSelfDnDHanlderTestPage() {
   });
 
   const onItemClick = useCallback((item: ICommon.Item) => {
-    if (dnd.isRealDragging) return;
+    if (dnd.isDragging) return;
     alert('hi!');
-  }, [dnd.isRealDragging]);
+  }, [dnd.isDragging]);
 
   useEffect(() => {
     // 데이터를 나중에 할당해야 하는 경우에는 아래와 같이 비동기로 데이터를 불러온 이후에 dnd.setItems 메서드로 할당 가능합니다.
@@ -57,41 +57,10 @@ export default function ItemSelfDnDHanlderTestPage() {
   }, []);
 
   useEffect(() => {
-    // console.log(new Map([
-    //   [
-    //     'aList', 
-    //     {
-    //       items: [
-    //         { name: 'a', value: 'a' },
-    //         { name: 'aaa', value: 'aaa' },
-    //         { name: 'aaaaa', value: 'aaaaa' },
-    //         { name: 'aaaaaaa', value: 'aaaaaaa' },
-    //       ],
-    //       ref: createRef<HTMLDivElement>(),
-    //       listLayout: {
-    //         type: 'one-col-infinite',
-    //       },
-    //     }
-    //   ],
-    //   [
-    //     'bList', 
-    //     {
-    //       items: [
-    //         { name: 'b', value: 'b' },
-    //         { name: 'bbb', value: 'bbb' },
-    //         { name: 'bbbbb', value: 'bbbbb' },
-    //         { name: 'bbbbbbb', value: 'bbbbbbb' },
-    //       ],
-    //       ref: createRef<HTMLDivElement>(),
-    //       listLayout: {
-    //         type: 'one-col-infinite',
-    //       },
-    //     }
-    //   ],
-    // ]));
+    if (!dnd.isInit) return;
     console.log(`dnd.getList('aList')`, dnd.getList('aList'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dnd.isInit]);
 
   return (
     <>

@@ -18,8 +18,9 @@ export function useDragAndDrop<
   } = props;
   const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
+  const [isInit, setIsInit] = useState<boolean>(false);
+  const [isPressing, setIsPressing] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [isRealDragging, setIsRealDragging] = useState<boolean>(false);
 
   const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
 
@@ -330,7 +331,7 @@ export function useDragAndDrop<
       offsetY: event.offsetY,
     };
 
-    setIsDragging(true);
+    setIsPressing(true);
     setDragFromInfo(dragInfo);
     setDragToInfo({
       ...dragInfo,
@@ -375,7 +376,7 @@ export function useDragAndDrop<
 
     const ref = target.ref;
 
-    if (!isDragging) return;
+    if (!isPressing) return;
     if (!isDragTargetThisRef(ref, event)) {
       for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
         (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
@@ -383,7 +384,7 @@ export function useDragAndDrop<
       return;
     }
 
-    setIsRealDragging(true);
+    setIsDragging(true);
 
     if (typeof onDestinationActiveListName === 'function') {
       onDestinationActiveListName(key);  
@@ -550,10 +551,10 @@ export function useDragAndDrop<
         } break;
       }
     }
-  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, isDragTargetThisRef, isDragging, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
+  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, isDragTargetThisRef, isPressing, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
+    if (!isPressing) return;
     if (lists === undefined) return;
 
     const dragFromInfo = getDragFromInfo();
@@ -574,10 +575,10 @@ export function useDragAndDrop<
     }) ?? [undefined , undefined];
 
     onMovingTargetRef(key, target, event);
-  }, [getDragFromInfo, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isDragging, isIncludePointRangeTargetCursor, lists, onMovingTargetRef]);
+  }, [getDragFromInfo, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isIncludePointRangeTargetCursor, isPressing, lists, onMovingTargetRef]);
 
   const onPressEnd = useCallback((event: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
+    if (!isPressing) return;
     if (lists === undefined) return;
 
     Array.from(lists.entries()).forEach(([k, v]) => {
@@ -651,7 +652,7 @@ export function useDragAndDrop<
       return newLists;
     });
 
-    setIsDragging(false);
+    setIsPressing(false);
 
     if (isMobile()) {
       body.allowScroll();
@@ -661,7 +662,7 @@ export function useDragAndDrop<
     if (typeof onEndDrag === 'function') {
       onEndDrag(dragFromInfo, dragToInfo);
     }
-  }, [body, getDragFromInfo, getDragToInfo, isDragging, isMobile, lists, onEndDrag, onListsChange]);
+  }, [body, getDragFromInfo, getDragToInfo, isPressing, isMobile, lists, onEndDrag, onListsChange]);
 
   const getList = useCallback((key: E) => {
     if (lists === undefined) return undefined;
@@ -714,18 +715,20 @@ export function useDragAndDrop<
   useEffect(() => {
     if (props.lists === undefined) return;
     setLists(new Map(props.lists));
+    setIsInit(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (isDragging === false) {
-      setIsRealDragging(false);
+    if (isPressing === false) {
+      setIsDragging(false);
     }
-  }, [isDragging]);
+  }, [isPressing]);
 
   return {
+    isInit,
+    isPressing,
     isDragging,
-    isRealDragging,
     getList,
     setItems,
   };
