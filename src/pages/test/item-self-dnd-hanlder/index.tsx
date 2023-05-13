@@ -1,56 +1,60 @@
-import { useDragAndDropController } from "@/hooks/use-drag-and-drop-controller/use-drag-and-drop-controller.hook";
-import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
+import { useDragAndDrop } from "@/hooks/new/use-drag-and-drop/use-drag-and-drop.hook";
 import { ICommon } from "@/interfaces/common.interface";
-import { useCallback, useState } from "react";
+import { createRef, useCallback, useEffect } from "react";
 
 export default function ItemSelfDnDHanlderTestPage() {
-  const [aList, setAList] = useState<ICommon.Item[] | undefined>([
-    { name: 'a', value: 'a', },
-    { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaa', },
-    { name: 'aaaaa', value: 'aaaaa', },
-    { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', },
-  ]);
-
-  const [bList, setBList] = useState<ICommon.Item[] | undefined>([
-    { name: 'b', value: 'b', },
-    { name: 'bbb', value: 'bbb', },
-    { name: 'bbbbb', value: 'bbbbb', },
-    { name: 'bbbbbbb', value: 'bbbbbbb', },
-  ]);
-
-  const dndController = useDragAndDropController<ICommon.Item>({
-    onListsChange(map) {
-      if (map.has('aList')) {
-        setAList(map.get('aList'));
-      }
-      if (map.has('bList')) {
-        setBList(map.get('bList'));
-      }
-    },
-  });
-
-  const aListDnD = useDragAndDrop({
-    controller: dndController,
-    name: 'aList',
-    list: aList,
-    listLayout: {
-      type: 'one-col-infinite',
-    },
-  });
-
-  const bListDnD = useDragAndDrop({
-    controller: dndController,
-    name: 'bList',
-    list: bList,
-    listLayout: {
-      type: 'one-col-infinite',
+  const dnd = useDragAndDrop({
+    lists: {
+      aList: {
+        list: [
+          { name: 'a', value: 'a' },
+          { name: 'aaa', value: 'aaa' },
+          { name: 'aaaaa', value: 'aaaaa' },
+          { name: 'aaaaaaa', value: 'aaaaaaa' },
+        ],
+        ref: createRef<HTMLDivElement>(),
+        listLayout: {
+          type: 'one-col-infinite'
+        },
+      },
+      bList: {
+        list: [
+          { name: 'b', value: 'b' },
+          { name: 'bbb', value: 'bbb' },
+          { name: 'bbbbb', value: 'bbbbb' },
+          { name: 'bbbbbbb', value: 'bbbbbbb' },
+        ],
+        ref: createRef<HTMLDivElement>(),
+        listLayout: {
+          type: 'one-col-infinite'
+        },
+      },
+      cList: {
+        list: [],
+        ref: createRef<HTMLDivElement>(),
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      },
     },
   });
 
   const onItemClick = useCallback((item: ICommon.Item) => {
-    if (dndController.isDragging) return;
+    if (dnd.isDragging) return;
     alert('hi!');
-  }, [dndController.isDragging]);
+  }, [dnd.isDragging]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      dnd.setItems('bList', [
+        { name: 'b2', value: 'b2' },
+        { name: 'bbb2', value: 'bbb2' },
+        { name: 'bbbbb2', value: 'bbbbb2' },
+        { name: 'bbbbbbb2', value: 'bbbbbbb2' },
+      ]);
+    }, 2000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -59,9 +63,9 @@ export default function ItemSelfDnDHanlderTestPage() {
       <div className="w-full grid grid-cols-2 gap-2">
         <div>
           <div className="w-full box-border relative">
-            <div ref={aListDnD.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
+            <div ref={dnd.getList('aList')?.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
-                aList?.map((item) => (
+                dnd.getList('aList')?.list?.map((item) => (
                   <div data-is-dnd-handler={true} key={item.value} 
                     className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full cursor-pointer hover:bg-gray-100" 
                     onClick={() => onItemClick(item)}>
@@ -80,9 +84,9 @@ export default function ItemSelfDnDHanlderTestPage() {
 
         <div>
           <div className="w-full box-border relative">
-            <div ref={bListDnD.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
+            <div ref={dnd.getList('bList')?.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
-                bList?.map((item) => (
+                dnd.getList('bList')?.list?.map((item) => (
                   <div data-is-dnd-handler={true} key={item.value} 
                     className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full cursor-pointer hover:bg-gray-100" 
                     onClick={() => onItemClick(item)}>
