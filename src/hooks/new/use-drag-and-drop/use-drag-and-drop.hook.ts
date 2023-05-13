@@ -323,7 +323,7 @@ export function useDragAndDrop<
 
     const dragInfo: IUseDragAndDrop.DragInfo<T, K, Q> =  {
       name: dragFirstStartFromInfo?.name ?? '',
-      item: dragFirstStartFromInfo?.info.list?.at(index),
+      item: dragFirstStartFromInfo?.info.items?.at(index),
       targetIndex: index,
       targetItemElement: itemElement,
       targetItemElementRect: itemElement?.getBoundingClientRect(),
@@ -401,7 +401,7 @@ export function useDragAndDrop<
 
     setDragToInfo({
       name: key ?? '',
-      item: target?.list?.at(destinationIndex),
+      item: target?.items?.at(destinationIndex),
       targetIndex: destinationIndex,
       targetItemElement: null,
       targetItemElementRect: undefined,
@@ -606,7 +606,7 @@ export function useDragAndDrop<
     const dragFromInfo = getDragFromInfo();
     const dragToInfo = getDragToInfo();
 
-    const destinationList = lists[dragToInfo?.name ?? ''].list;
+    const destinationList = lists[dragToInfo?.name ?? ''].items;
     const copyDestinationList = [ ...destinationList ];
     
     const changeInfo = new Map<string, T[]>();
@@ -615,7 +615,7 @@ export function useDragAndDrop<
       if (dragFromInfo?.item !== undefined) {
         copyDestinationList.splice(dragToInfo?.targetIndex ?? 0, 0, dragFromInfo.item);
         changeInfo.set(dragToInfo?.name.toString() ?? '', copyDestinationList);
-        changeInfo.set(dragFromInfo?.name.toString() ?? '', lists[dragFromInfo?.name ?? '']?.list?.filter((_, index) => index !== (dragFromInfo?.targetIndex ?? -1)) ?? []);
+        changeInfo.set(dragFromInfo?.name.toString() ?? '', lists[dragFromInfo?.name ?? '']?.items?.filter((_, index) => index !== (dragFromInfo?.targetIndex ?? -1)) ?? []);
       }
     } else {
       if (dragFromInfo?.item !== undefined) {
@@ -637,10 +637,10 @@ export function useDragAndDrop<
     setLists(prev => {
       const newLists: any = { ...prev };
       if (typeof dragFromInfo?.name === 'string') {
-        newLists[dragFromInfo.name].list = changeInfo.get(dragFromInfo.name) ?? []; 
+        newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
       }
       if (typeof dragToInfo?.name === 'string') {
-        newLists[dragToInfo.name].list = changeInfo.get(dragToInfo.name) ?? [];
+        newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
       }
       return newLists;
     });
@@ -665,7 +665,7 @@ export function useDragAndDrop<
   const setItems = useCallback((key: keyof Q, items: T[]) => {
     setLists(prev => {
       const newLists: any = { ...prev };
-      newLists[key].list = items;
+      newLists[key].items = items;
       return newLists;
     });
   }, []);

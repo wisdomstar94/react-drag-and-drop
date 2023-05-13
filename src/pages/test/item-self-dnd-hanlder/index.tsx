@@ -6,7 +6,7 @@ export default function ItemSelfDnDHanlderTestPage() {
   const dnd = useDragAndDrop({
     lists: {
       aList: {
-        list: [
+        items: [
           { name: 'a', value: 'a' },
           { name: 'aaa', value: 'aaa' },
           { name: 'aaaaa', value: 'aaaaa' },
@@ -18,7 +18,7 @@ export default function ItemSelfDnDHanlderTestPage() {
         },
       },
       bList: {
-        list: [
+        items: [
           { name: 'b', value: 'b' },
           { name: 'bbb', value: 'bbb' },
           { name: 'bbbbb', value: 'bbbbb' },
@@ -30,7 +30,7 @@ export default function ItemSelfDnDHanlderTestPage() {
         },
       },
       cList: {
-        list: [],
+        items: [],
         ref: createRef<HTMLDivElement>(),
         listLayout: {
           type: 'one-col-infinite',
@@ -66,7 +66,7 @@ export default function ItemSelfDnDHanlderTestPage() {
           <div className="w-full box-border relative">
             <div ref={dnd.getList('aList')?.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
-                dnd.getList('aList')?.list?.map((item) => (
+                dnd.getList('aList')?.items?.map((item) => (
                   <div data-is-dnd-handler={true} key={item.value} 
                     className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full cursor-pointer hover:bg-gray-100" 
                     onClick={() => onItemClick(item)}>
@@ -87,7 +87,7 @@ export default function ItemSelfDnDHanlderTestPage() {
           <div className="w-full box-border relative">
             <div ref={dnd.getList('bList')?.ref} className="bg-blue-200 p-2 flex flex-wrap items-start content-start pb-24 h-screen">
               {
-                dnd.getList('bList')?.list?.map((item) => (
+                dnd.getList('bList')?.items?.map((item) => (
                   <div data-is-dnd-handler={true} key={item.value} 
                     className="flex gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full cursor-pointer hover:bg-gray-100" 
                     onClick={() => onItemClick(item)}>

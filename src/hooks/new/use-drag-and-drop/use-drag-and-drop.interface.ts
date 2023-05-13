@@ -31,7 +31,7 @@ export declare namespace IUseDragAndDrop {
   }
 
   export interface List<T = any, K extends HTMLElement = HTMLElement> {
-    list: T[];
+    items: T[];
     listLayout: ListLayout;
     ref: RefObject<K>;
   }
