@@ -38,14 +38,7 @@ export default function DragEffectTestPage() {
         },
       ],
     ],
-    onStartDrag(dragFromInfo) {
-      const fromItemElement = dragFromInfo?.targetItemElement;
-      fromItemElement?.firstElementChild?.classList.add(styles['drag-from-item-effect']);
-    },
-    onEndDrag(dragFromInfo, dragToInfo) {
-      const fromItemElement = dragFromInfo?.targetItemElement;
-      fromItemElement?.firstElementChild?.classList.remove(styles['drag-from-item-effect']);
-    },
+    draggingItemClassName: styles['drag-from-item-effect'],
   });
 
   return (

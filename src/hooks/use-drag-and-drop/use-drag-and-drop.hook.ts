@@ -1,4 +1,4 @@
-import { RefObject, createRef, useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, createRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IUseDragAndDrop } from "./use-drag-and-drop.interface";
 import { useBody } from "@/hooks/use-body/use-body.hook";
 import useAddEventListener from "@/hooks/use-add-event-listener/use-add-event-listener.hook";
@@ -16,6 +16,9 @@ export function useDragAndDrop<
     onStartDrag,
     onEndDrag,
   } = props;
+
+  const draggingItemClassName = useMemo<string>(() => props.draggingItemClassName ?? '', [props.draggingItemClassName]);
+
   const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const [isInit, setIsInit] = useState<boolean>(false);
@@ -718,6 +721,21 @@ export function useDragAndDrop<
     setIsInit(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const dragFromInfo = getDragFromInfo();
+    const fromItemElement = dragFromInfo?.targetItemElement;
+    const draggingItemClassNames = draggingItemClassName.split(' ');
+    draggingItemClassNames.forEach((className) => {
+      if (className.trim() === '') return;
+      if (isDragging) {
+        fromItemElement?.firstElementChild?.classList.add(className);
+      } else {
+        fromItemElement?.firstElementChild?.classList.remove(className);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDragging]);
 
   useEffect(() => {
     if (isPressing === false) {

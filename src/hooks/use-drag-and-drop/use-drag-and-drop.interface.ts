@@ -38,6 +38,7 @@ export declare namespace IUseDragAndDrop {
 
   export interface Props<T, K extends HTMLElement, E extends string> {
     lists: [E, List<T, K>][];
+    draggingItemClassName?: string;
     onListsChange?: (map: Map<E, T[]>) => void;
     onDestinationActiveListName?: (name: E | undefined) => void;
     onStartDrag?: (dragFromInfo: DragInfo<T, K, E>) => void;
