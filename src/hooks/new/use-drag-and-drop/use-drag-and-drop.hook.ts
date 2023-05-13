@@ -175,7 +175,6 @@ export function useDragAndDrop<
       (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.offsetX ?? 0), 
       (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.offsetY ?? 0),
     ];
-    console.log({ cursorX, cursorY });
     
     const fromItemHeight = (dragFromInfo?.targetItemElementRect?.height ?? 0);
     const fromItemWidth = (dragFromInfo?.targetItemElementRect?.width ?? 0);
