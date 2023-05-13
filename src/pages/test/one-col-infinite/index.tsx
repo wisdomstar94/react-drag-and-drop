@@ -1,4 +1,4 @@
-import { useDragAndDrop } from "@/hooks/new/use-drag-and-drop/use-drag-and-drop.hook";
+import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
 import { createRef } from "react";
 
 export default function OneColInfiniteTestPage() {
