@@ -10,7 +10,7 @@ export declare namespace IUseDragAndDrop {
   ;
 
   export interface DragInfo<T = any, K extends HTMLElement = HTMLElement, E = string> {
-    name?: E;
+    name: E | undefined;
     item: T | undefined;
     targetIndex: number;
     targetItemElement: HTMLElement | null | undefined;
@@ -39,7 +39,7 @@ export declare namespace IUseDragAndDrop {
   export interface Props<T, K extends HTMLElement, E extends string> {
     lists: [E, List<T, K>][];
     onListsChange?: (map: Map<E, T[]>) => void;
-    onDestinationActiveListName?: (key: E | undefined) => void;
+    onDestinationActiveListName?: (name: E | undefined) => void;
     onStartDrag?: (dragFromInfo: DragInfo<T, K, E>) => void;
     onEndDrag?: (dragFromInfo?: DragInfo<T, K, E>, dragToInfo?: DragInfo<T, K, E>) => void;
   }
