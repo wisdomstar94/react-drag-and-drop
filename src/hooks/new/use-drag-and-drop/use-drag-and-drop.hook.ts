@@ -653,9 +653,6 @@ export function useDragAndDrop<
     });
 
     setIsDragging(false);
-    setTimeout(() => {
-      setIsRealDragging(false);
-    }, 0);
 
     if (isMobile()) {
       body.allowScroll();
@@ -720,6 +717,12 @@ export function useDragAndDrop<
     setLists(new Map(props.lists));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (isDragging === false) {
+      setIsRealDragging(false);
+    }
+  }, [isDragging]);
 
   return {
     isDragging,
