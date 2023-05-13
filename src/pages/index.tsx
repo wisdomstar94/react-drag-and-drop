@@ -15,7 +15,7 @@ export default function Home() {
     <>
       <ul>
         <li>
-          <Link href="/test/controller-grouping">/test/controller-grouping</Link>
+          <Link href="/test/grouping">/test/grouping</Link>
         </li>
         <li>
           <Link href="/test/one-row-infinite">/test/one-row-infinite</Link>
