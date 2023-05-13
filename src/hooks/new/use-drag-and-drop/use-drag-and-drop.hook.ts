@@ -15,7 +15,6 @@ export function useDragAndDrop<
     onDestinationActiveListName,
     onStartDrag,
     onEndDrag,
-    // lists,
   } = props;
   const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
@@ -53,7 +52,6 @@ export function useDragAndDrop<
         return value.ref.current === currentElement;
       }) ?? [];
 
-      // const findTarget = lists .find(x => x.value.ref.current === currentElement);
       if (findTarget !== undefined) {
         return {
           name: targetKey,
@@ -172,10 +170,6 @@ export function useDragAndDrop<
   const getDragDestinationTargetIndexInfo = useCallback((ref: RefObject<K>, event: MouseEvent | TouchEvent) => {
     const dragFromInfo = getDragFromInfo();
     const [refAbsoluteX, refAbsoluteY] = getElementAbsoluteXY(ref.current);
-    // const [cursorX, cursorY] = [
-    //   (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX), 
-    //   (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY),
-    // ];
     const [cursorX, cursorY] = [
       (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.offsetX ?? 0), 
       (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.offsetY ?? 0),
@@ -191,7 +185,6 @@ export function useDragAndDrop<
       return value.ref === ref;
     }) ?? [];
 
-    // const target = convertMapToArray(listMap.current).find(x => x.value.ref === ref);
     const layoutType = target?.listLayout.type;
     const fixedColCount = target?.listLayout.fixedColCount ?? 0;
     const fixedRowCount = target?.listLayout.fixedRowCount ?? 0;
@@ -378,7 +371,6 @@ export function useDragAndDrop<
   }, [body, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisGroup, isMobile, lists, onStartDrag, setDragFromInfo, setDragToInfo]);
 
   const onMovingTargetRef = useCallback((key: E | undefined, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
-    console.log('@onMovingTargetRef', { key, target, event });
     if (target === undefined) return;
 
     const ref = target.ref;
@@ -417,7 +409,6 @@ export function useDragAndDrop<
     });
 
     if (isSameFromDragRefEqualThisRef(ref)) {
-      console.log('@@ # 1');
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
@@ -507,7 +498,6 @@ export function useDragAndDrop<
         } break;
       }
     } else {
-      console.log('@@ # 2');
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
@@ -568,8 +558,6 @@ export function useDragAndDrop<
 
     const diffX = ((event instanceof MouseEvent) ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.pageX ?? 0);
     const diffY = ((event instanceof MouseEvent) ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.pageY ?? 0);
-
-    console.log({ diffX, diffY });
 
     const targetItemElement = dragFromInfo?.targetItemElement;
     if (targetItemElement !== undefined && targetItemElement !== null) {
@@ -723,7 +711,7 @@ export function useDragAndDrop<
 
   useEffect(() => {
     if (props.lists === undefined) return;
-    setLists(props.lists);
+    setLists(new Map(props.lists));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
