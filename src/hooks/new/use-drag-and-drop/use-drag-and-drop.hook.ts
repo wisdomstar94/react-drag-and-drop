@@ -19,6 +19,7 @@ export function useDragAndDrop<
   const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isRealDragging, setIsRealDragging] = useState<boolean>(false);
 
   const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
 
@@ -383,6 +384,8 @@ export function useDragAndDrop<
       return;
     }
 
+    setIsRealDragging(true);
+
     if (typeof onDestinationActiveListName === 'function') {
       onDestinationActiveListName(key);  
     }
@@ -650,6 +653,9 @@ export function useDragAndDrop<
     });
 
     setIsDragging(false);
+    setTimeout(() => {
+      setIsRealDragging(false);
+    }, 0);
 
     if (isMobile()) {
       body.allowScroll();
@@ -717,6 +723,7 @@ export function useDragAndDrop<
 
   return {
     isDragging,
+    isRealDragging,
     getList,
     setItems,
   };

@@ -39,9 +39,9 @@ export default function ItemSelfDnDHanlderTestPage() {
   });
 
   const onItemClick = useCallback((item: ICommon.Item) => {
-    if (dnd.isDragging) return;
-    // alert('hi!');
-  }, [dnd.isDragging]);
+    if (dnd.isRealDragging) return;
+    alert('hi!');
+  }, [dnd.isRealDragging]);
 
   useEffect(() => {
     // 데이터를 나중에 할당해야 하는 경우에는 아래와 같이 비동기로 데이터를 불러온 이후에 dnd.setItems 메서드로 할당 가능합니다.
