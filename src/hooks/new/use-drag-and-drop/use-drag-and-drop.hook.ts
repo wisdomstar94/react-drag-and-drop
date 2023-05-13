@@ -6,9 +6,9 @@ import useAddEventListener from "@/hooks/use-add-event-listener/use-add-event-li
 export function useDragAndDrop<
   T, 
   K extends HTMLElement, 
-  Q extends IUseDragAndDrop.Lists<T, K>,
+  E extends string,
 >(
-  props: IUseDragAndDrop.Props<T, K, Q>
+  props: IUseDragAndDrop.Props<T, K, E>
 ) {
   const {
     onListsChange,
@@ -17,11 +17,11 @@ export function useDragAndDrop<
     onEndDrag,
     // lists,
   } = props;
-  const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, Q>>();
-  const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, Q>>();
+  const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
+  const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const [lists, setLists] = useState<Q>();
+  const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
 
   const body = useBody();
   
@@ -45,8 +45,9 @@ export function useDragAndDrop<
     const element = event.target as (HTMLElement | null | undefined);
     let currentElement = element;
     for (let i = 0; i < 20; i++) {
-      let targetKey = '';
-      const [_, findTarget] = Object.entries(lists).find(x => {
+      let targetKey: E | undefined;
+
+      const [_, findTarget] = Array.from(lists.entries()).find(x => {
         const [key, value] = x;
         targetKey = key;
         return value.ref.current === currentElement;
@@ -80,11 +81,11 @@ export function useDragAndDrop<
     if (lists === undefined) return false;
     const element = event.target as HTMLElement | null | undefined;
     let currentElement = element;
+
+    const values = Array.from(lists.values());
     for (let i = 0; i < 20; i++) {
-      const keys = Object.keys(lists);
-      for (const key of keys) {
-        const item = lists[key];
-        if (item.ref.current === currentElement) {
+      for (const list of values) {
+        if (list.ref.current === currentElement) {
           return true;
         }
       }
@@ -127,7 +128,7 @@ export function useDragAndDrop<
     return dragFromInfo.current;
   }, []);
 
-  const setDragFromInfo = useCallback((dragInfo?: IUseDragAndDrop.DragInfo<T, K, Q>) => {
+  const setDragFromInfo = useCallback((dragInfo?: IUseDragAndDrop.DragInfo<T, K, E>) => {
     dragFromInfo.current = dragInfo;
   }, []);
 
@@ -135,7 +136,7 @@ export function useDragAndDrop<
     return dragToInfo.current;
   }, []);
 
-  const setDragToInfo = useCallback((dragInfo?: IUseDragAndDrop.DragInfo<T, K, Q>) => {
+  const setDragToInfo = useCallback((dragInfo?: IUseDragAndDrop.DragInfo<T, K, E>) => {
     dragToInfo.current = dragInfo;
   }, []);
 
@@ -185,7 +186,7 @@ export function useDragAndDrop<
     const fromItemWidth = (dragFromInfo?.targetItemElementRect?.width ?? 0);
     const itemTotalCount = (ref.current?.childElementCount ?? 0) + 1;
 
-    const [_, target] = Object.entries(lists ?? {}).find(x => {
+    const [_, target] = Array.from(lists.entries()).find(x => {
       const [key, value] = x;
       return value.ref === ref;
     }) ?? [];
@@ -321,8 +322,8 @@ export function useDragAndDrop<
       body.denyTextDrag();
     }
 
-    const dragInfo: IUseDragAndDrop.DragInfo<T, K, Q> =  {
-      name: dragFirstStartFromInfo?.name ?? '',
+    const dragInfo: IUseDragAndDrop.DragInfo<T, K, E> =  {
+      name: dragFirstStartFromInfo?.name,
       item: dragFirstStartFromInfo?.info.items?.at(index),
       targetIndex: index,
       targetItemElement: itemElement,
@@ -345,7 +346,7 @@ export function useDragAndDrop<
       ref: dragFirstStartFromInfo?.info.ref ?? createRef(),
     });
 
-    Object.entries(lists ?? {}).forEach(([key, value]) => {
+    Array.from(lists.entries()).forEach(([key, value]) => {
       const item = value;
       if (item.ref.current === null) return;
       if (item.ref === dragFirstStartFromInfo?.info.ref) {
@@ -376,7 +377,8 @@ export function useDragAndDrop<
     }
   }, [body, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisGroup, isMobile, lists, onStartDrag, setDragFromInfo, setDragToInfo]);
 
-  const onMovingTargetRef = useCallback((key: string, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
+  const onMovingTargetRef = useCallback((key: E | undefined, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
+    console.log('@onMovingTargetRef', { key, target, event });
     if (target === undefined) return;
 
     const ref = target.ref;
@@ -400,7 +402,7 @@ export function useDragAndDrop<
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
 
     setDragToInfo({
-      name: key ?? '',
+      name: key,
       item: target?.items?.at(destinationIndex),
       targetIndex: destinationIndex,
       targetItemElement: null,
@@ -415,6 +417,7 @@ export function useDragAndDrop<
     });
 
     if (isSameFromDragRefEqualThisRef(ref)) {
+      console.log('@@ # 1');
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
@@ -504,6 +507,7 @@ export function useDragAndDrop<
         } break;
       }
     } else {
+      console.log('@@ # 2');
       switch (dragDestinationTargetIndexInfo.layoutType) {
         case 'one-col-infinite': {
           const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
@@ -558,6 +562,7 @@ export function useDragAndDrop<
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
+    if (lists === undefined) return;
 
     const dragFromInfo = getDragFromInfo();
 
@@ -571,12 +576,12 @@ export function useDragAndDrop<
       targetItemElement.style.transform = `translateX(${diffX}px) translateY(${diffY}px)`;
     }
 
-    const [key, target] = Object.entries(lists ?? {}).find(([k, v]) => {
+    const [key, target] = Array.from(lists.entries()).find(([k, v]) => {
       const refRange = getRefAbsolutePointRange(v.ref);
       const cursorPoint = getEventCursorAbsoluteXY(event);
       const isInclude = isIncludePointRangeTargetCursor(refRange.start, refRange.end, cursorPoint);
       return isInclude;
-    }) ?? ['' , undefined];
+    }) ?? [undefined , undefined];
 
     onMovingTargetRef(key, target, event);
   }, [getDragFromInfo, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isDragging, isIncludePointRangeTargetCursor, lists, onMovingTargetRef]);
@@ -585,7 +590,7 @@ export function useDragAndDrop<
     if (!isDragging) return;
     if (lists === undefined) return;
 
-    Object.entries(lists ?? {}).forEach(([k, v]) => {
+    Array.from(lists.entries()).forEach(([k, v]) => {
       const item = v;
       let currentElement: HTMLElement | null | undefined = item.ref.current;
       for (let i = 0; i < 2; i++) {
@@ -606,22 +611,22 @@ export function useDragAndDrop<
     const dragFromInfo = getDragFromInfo();
     const dragToInfo = getDragToInfo();
 
-    const destinationList = lists[dragToInfo?.name ?? ''].items;
+    const destinationList = dragToInfo?.name === undefined ? [] : lists?.get(dragToInfo?.name)?.items ?? [];
     const copyDestinationList = [ ...destinationList ];
     
-    const changeInfo = new Map<string, T[]>();
+    const changeInfo = new Map<E, T[]>();
     
     if (dragFromInfo?.name !== dragToInfo?.name) {
-      if (dragFromInfo?.item !== undefined) {
+      if (dragFromInfo?.item !== undefined && dragToInfo?.name !== undefined && dragFromInfo?.name) {
         copyDestinationList.splice(dragToInfo?.targetIndex ?? 0, 0, dragFromInfo.item);
-        changeInfo.set(dragToInfo?.name.toString() ?? '', copyDestinationList);
-        changeInfo.set(dragFromInfo?.name.toString() ?? '', lists[dragFromInfo?.name ?? '']?.items?.filter((_, index) => index !== (dragFromInfo?.targetIndex ?? -1)) ?? []);
+        changeInfo.set(dragToInfo?.name, copyDestinationList);
+        changeInfo.set(dragFromInfo?.name, lists?.get(dragFromInfo?.name)?.items?.filter((_, index) => index !== (dragFromInfo?.targetIndex ?? -1)) ?? []);
       }
     } else {
-      if (dragFromInfo?.item !== undefined) {
+      if (dragFromInfo?.item !== undefined && dragFromInfo?.name !== undefined) {
         copyDestinationList.splice(dragFromInfo?.targetIndex ?? 0, 1);
         copyDestinationList.splice(dragToInfo?.targetIndex ?? 0, 0, dragFromInfo.item);
-        changeInfo.set(dragFromInfo?.name.toString() ?? '', copyDestinationList);
+        changeInfo.set(dragFromInfo?.name, copyDestinationList);
       }
     }
 
@@ -635,12 +640,23 @@ export function useDragAndDrop<
       onListsChange(changeInfo);
     }
     setLists(prev => {
-      const newLists: any = { ...prev };
+      const newLists = new Map(prev);
+
       if (typeof dragFromInfo?.name === 'string') {
-        newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
+        const fromList = prev.get(dragFromInfo?.name);
+        if (fromList !== undefined) {
+          // newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
+          fromList.items = changeInfo.get(dragFromInfo.name) ?? [];
+          newLists.set(dragFromInfo?.name, fromList);
+        }
       }
       if (typeof dragToInfo?.name === 'string') {
-        newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
+        const toList = prev.get(dragToInfo?.name);
+        if (toList !== undefined) {
+          // newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
+          toList.items = changeInfo.get(dragToInfo.name) ?? [];
+          newLists.set(dragToInfo?.name, toList);
+        }
       }
       return newLists;
     });
@@ -657,15 +673,20 @@ export function useDragAndDrop<
     }
   }, [body, getDragFromInfo, getDragToInfo, isDragging, isMobile, lists, onEndDrag, onListsChange]);
 
-  const getList = useCallback((key: keyof Q) => {
+  const getList = useCallback((key: E) => {
     if (lists === undefined) return undefined;
-    return lists[key];
+    return lists.get(key);
   }, [lists]);
 
-  const setItems = useCallback((key: keyof Q, items: T[]) => {
+  const setItems = useCallback((key: E, items: T[]) => {
     setLists(prev => {
-      const newLists: any = { ...prev };
-      newLists[key].items = items;
+      const newLists = new Map(prev);
+      const keyList = prev.get(key);
+      if (keyList === undefined) {
+        return newLists;
+      }
+      keyList.items = items;
+      newLists.set(key, keyList);
       return newLists;
     });
   }, []);
@@ -701,7 +722,7 @@ export function useDragAndDrop<
   });
 
   useEffect(() => {
-    if (lists !== undefined) return;
+    if (props.lists === undefined) return;
     setLists(props.lists);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

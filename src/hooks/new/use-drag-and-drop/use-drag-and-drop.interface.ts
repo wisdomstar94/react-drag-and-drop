@@ -9,8 +9,8 @@ export declare namespace IUseDragAndDrop {
     ''
   ;
 
-  export interface DragInfo<T = any, K extends HTMLElement = HTMLElement, Q extends Lists<T, K> = Lists<T, K>> {
-    name: keyof Q;
+  export interface DragInfo<T = any, K extends HTMLElement = HTMLElement, E = string> {
+    name?: E;
     item: T | undefined;
     targetIndex: number;
     targetItemElement: HTMLElement | null | undefined;
@@ -30,21 +30,21 @@ export declare namespace IUseDragAndDrop {
     fixedRowCount?: number;
   }
 
-  export interface List<T = any, K extends HTMLElement = HTMLElement> {
+  export interface List<T, K extends HTMLElement> {
     items: T[];
     listLayout: ListLayout;
     ref: RefObject<K>;
   }
 
-  export interface Lists<T, K extends HTMLElement> {
-    [key: string]: List<T, K>;
-  }
+  // export interface Lists<T, K extends HTMLElement> {
+  //   [key: string]: List<T, K>;
+  // }
 
-  export interface Props<T = any, K extends HTMLElement = HTMLElement, Q extends Lists<T, K> = Lists<T, K>> {
-    lists: Q;
-    onListsChange?: (map: Map<string, T[]>) => void;
-    onDestinationActiveListName?: (name: string) => void;
-    onStartDrag?: (dragFromInfo: DragInfo<T, K, Q>) => void;
-    onEndDrag?: (dragFromInfo?: DragInfo<T, K, Q>, dragToInfo?: DragInfo<T, K, Q>) => void;
+  export interface Props<T, K extends HTMLElement, E extends string> {
+    lists: Map<E, List<T, K>>;
+    onListsChange?: (map: Map<E, T[]>) => void;
+    onDestinationActiveListName?: (key: E | undefined) => void;
+    onStartDrag?: (dragFromInfo: DragInfo<T, K, E>) => void;
+    onEndDrag?: (dragFromInfo?: DragInfo<T, K, E>, dragToInfo?: DragInfo<T, K, E>) => void;
   }
 }
