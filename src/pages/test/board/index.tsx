@@ -111,19 +111,24 @@ export default function BoardTestPage() {
     <>
       <div className="w-full relative">
         <div className="w-full box-border relative">
-          <div ref={dndBoard.getList('board')?.ref} className="bg-blue-200 p-2 flex pr-20 h-screen">
+          <div ref={dndBoard.getList('board')?.ref} data-is-dnd-list={true} className="bg-blue-200 p-2 flex pr-20 h-screen">
             {
               dndBoard.getList('board')?.items.map((item) => (
-                <div key={item.value} className="min-w-[160px] inline-flex flex-wrap content-start gap-2 border border-slate-300 p-2 rounded-lg bg-white">
+                <div key={item.value} className="w-[160px] inline-flex flex-wrap content-start border border-slate-300 p-2 rounded-lg bg-white">
                   <div data-is-dnd-handler={true} className="cursor-move w-full">
                     :::
                   </div>
-                  <div ref={dnd.getList(item.name as any)?.ref} className="w-full flex flex-wrap content-start gap-1 box-border p-4 bg-slate-100">
+                  <div ref={dnd.getList(item.name as any)?.ref} data-is-dnd-list={true} className="w-full flex flex-wrap content-start box-border bg-transparent">
                     {
                       dnd.getList(item.name as any)?.items.map((_item) => {
                         return (
-                          <div key={_item.value} data-is-dnd-handler={true} className="w-full bg-blue-200 box-border p-2 cursor-pointer hover:bg-blue-300">
-                            { _item.name }
+                          <div key={_item.value} className="w-full relative block">
+                            <div className="w-full bg-blue-200 box-border p-2 cursor-pointer hover:bg-blue-300" data-is-dnd-handler={true}>
+                              { _item.name }
+                            </div>
+                            <div className="h-1 w-full">
+
+                            </div>
                           </div>
                         )
                       })

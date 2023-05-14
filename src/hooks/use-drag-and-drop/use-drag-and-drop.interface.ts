@@ -41,6 +41,7 @@ export declare namespace IUseDragAndDrop {
   }
 
   export interface Props<T, K extends HTMLElement, E extends string> {
+    dndTitle?: string;
     lists: [E, List<T, K>][];
     draggingItemClassName?: string;
     draggingNotFormListClassName?: string;

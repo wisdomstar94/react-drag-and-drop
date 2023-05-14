@@ -5,6 +5,8 @@ import useAddEventListener from "@/hooks/use-add-event-listener/use-add-event-li
 import styles from './use-drag-and-drop.module.css';
 
 const TRANSITION_DURATION = 300; // use-drag-and-drop.module.css 내용에 맞춰주세요.
+const DATA_IS_DND_LIST = `data-is-dnd-list`;
+const DATA_IS_DND_HANDLER = `data-is-dnd-handler`;
 
 export function useDragAndDrop<
   T, 
@@ -14,6 +16,7 @@ export function useDragAndDrop<
   props: IUseDragAndDrop.Props<T, K, E>
 ) {
   const {
+    dndTitle,
     onListsChange,
     onDestinationActiveListName,
     onStartDrag,
@@ -77,14 +80,29 @@ export function useDragAndDrop<
   const isDnDHandler = useCallback((event: PointerEvent) => {
     const element = event.target as HTMLElement | null | undefined;
     let currentElement = element;
-    for (let i = 0; i < 20; i++) {
-      if (currentElement?.getAttribute('data-is-dnd-handler') === 'true') {
-        return true;
+
+    let isDndHandlerExist = false;
+    let isListExist = false;
+    let firstFindedListRefElement: HTMLElement | null = null;
+
+    for (let i = 0; i < 30; i++) {
+      if (currentElement?.getAttribute(DATA_IS_DND_HANDLER) === 'true') {
+        isDndHandlerExist = true;
+      }
+      if (currentElement?.getAttribute(DATA_IS_DND_LIST) === 'true') {
+        firstFindedListRefElement = currentElement;
+        isListExist = true;
+        break;
       }
       currentElement = currentElement?.parentElement;
     }
-    return false;
-  }, []);
+
+    if (isDndHandlerExist === false) return false;
+    if (isListExist === false) return false;
+    if (!Array.from(lists.values()).some((x) => x.ref.current === firstFindedListRefElement)) return false;
+
+    return true;
+  }, [lists]);
 
   const isDnDHandlerThisGroup = useCallback((event: PointerEvent) => {
     if (lists === undefined) return false;
