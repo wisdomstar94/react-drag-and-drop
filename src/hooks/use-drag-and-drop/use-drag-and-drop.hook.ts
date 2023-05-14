@@ -18,6 +18,8 @@ export function useDragAndDrop<
   } = props;
 
   const draggingItemClassName = useMemo<string>(() => props.draggingItemClassName ?? '', [props.draggingItemClassName]);
+  const draggingNotFormListClassName = useMemo<string>(() => props.draggingNotFormListClassName ?? '', [props.draggingNotFormListClassName]);
+  const draggingFormListClassName = useMemo<string>(() => props.draggingFormListClassName ?? '', [props.draggingFormListClassName]);
 
   const dragFromInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
   const dragToInfo = useRef<IUseDragAndDrop.DragInfo<T, K, E>>();
@@ -738,7 +740,7 @@ export function useDragAndDrop<
     });
   }, []);
 
-  const isNotDraggingForm = useCallback((name: E) => {
+  const isDraggingNotForm = useCallback((name: E) => {
     return isPressing && isDragging && getList(name)?.isDragFrom !== true;
   }, [getList, isDragging, isPressing]);
 
@@ -805,11 +807,28 @@ export function useDragAndDrop<
     }
   }, [isPressing]);
 
+  useEffect(() => {
+    const draggingFormListClassNames = draggingFormListClassName.split(' ');
+    const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
+
+    lists.forEach((value, name) => {
+      if (isDraggingFrom(name)) {
+        draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+      } else if (isDraggingNotForm(name)) {
+        draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+      } else {
+        draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+        draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lists, isPressing, isDragging]);
+
   return {
     isInit,
     isPressing,
     isDragging,
-    isNotDraggingForm,
+    isDraggingNotForm,
     isDraggingFrom,
     getList,
     setItems,

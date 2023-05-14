@@ -87,6 +87,8 @@ export default function DragEffectTestPage() {
       ],
     ],
     draggingItemClassName: styles['drag-from-item-effect'],
+    draggingFormListClassName: styles['from-item-list-active'],
+    draggingNotFormListClassName: styles['from-item-list-expect-other-list-active'],
   });
 
   return (
@@ -98,8 +100,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('aList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                dnd.isNotDraggingForm('aList') ? styles['from-item-list-expect-other-list-active'] : '',
-                dnd.isDraggingFrom('aList') ? styles['from-item-list-active'] : '',
+                // dnd.isDraggingNotForm('aList') ? styles['from-item-list-expect-other-list-active'] : '',
+                // dnd.isDraggingFrom('aList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('aList')?.items.map((item) => (
@@ -125,8 +127,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('bList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                dnd.isNotDraggingForm('bList') ? styles['from-item-list-expect-other-list-active'] : '',
-                dnd.isDraggingFrom('bList') ? styles['from-item-list-active'] : '',
+                // dnd.isDraggingNotForm('bList') ? styles['from-item-list-expect-other-list-active'] : '',
+                // dnd.isDraggingFrom('bList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('bList')?.items.map((item) => (
@@ -152,8 +154,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('cList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                dnd.isNotDraggingForm('cList') ? styles['from-item-list-expect-other-list-active'] : '',
-                dnd.isDraggingFrom('cList') ? styles['from-item-list-active'] : '',
+                // dnd.isDraggingNotForm('cList') ? styles['from-item-list-expect-other-list-active'] : '',
+                // dnd.isDraggingFrom('cList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('cList')?.items.map((item) => (
@@ -179,8 +181,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('dList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                dnd.isNotDraggingForm('dList') ? styles['from-item-list-expect-other-list-active'] : '',
-                dnd.isDraggingFrom('dList') ? styles['from-item-list-active'] : '',
+                // dnd.isDraggingNotForm('dList') ? styles['from-item-list-expect-other-list-active'] : '',
+                // dnd.isDraggingFrom('dList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('dList')?.items.map((item) => (
@@ -206,8 +208,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('eList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                dnd.isNotDraggingForm('eList') ? styles['from-item-list-expect-other-list-active'] : '',
-                dnd.isDraggingFrom('eList') ? styles['from-item-list-active'] : '',
+                // dnd.isDraggingNotForm('eList') ? styles['from-item-list-expect-other-list-active'] : '',
+                // dnd.isDraggingFrom('eList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('eList')?.items.map((item) => (
