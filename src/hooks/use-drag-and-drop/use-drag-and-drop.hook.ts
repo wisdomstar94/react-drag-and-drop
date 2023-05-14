@@ -382,6 +382,8 @@ export function useDragAndDrop<
     if (isMobile()) {
       body.denyScroll();
       body.denyTextDrag();
+    } else {
+      body.denyTextDrag();
     }
 
     const dragInfo: IUseDragAndDrop.DragInfo<T, K, E> =  {
@@ -412,6 +414,10 @@ export function useDragAndDrop<
       });
     }
 
+    // if (dragInfo.targetItemElement !== undefined && dragInfo.targetItemElement !== null) {
+    //   dragInfo.targetItemElement.style.transitionDelay = '0ms';
+    // }
+
     setIsPressing(true);
     setDragFromInfo(dragInfo);
     setDragToInfo({
@@ -428,6 +434,8 @@ export function useDragAndDrop<
         const child = item.ref.current.children[i] as HTMLElement;
         if (child !== dragInfo.targetItemElement) {
           child.classList.add(styles['item-transition']);
+        } else {
+          child.classList.remove(styles['item-transition']);
         }
       }
       if (item.ref === dragFirstStartFromInfo?.info.ref) {
