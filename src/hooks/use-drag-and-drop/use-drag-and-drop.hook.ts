@@ -235,9 +235,13 @@ export function useDragAndDrop<
   const getDragDestinationTargetIndexInfo = useCallback((ref: RefObject<K>, event: MouseEvent | TouchEvent) => {
     const dragFromInfo = getDragFromInfo();
     const [refAbsoluteX, refAbsoluteY] = getElementAbsoluteXY(ref.current);
+    // const [cursorX, cursorY] = [
+    //   (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.offsetX ?? 0), 
+    //   (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.offsetY ?? 0),
+    // ];
     const [cursorX, cursorY] = [
-      (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.offsetX ?? 0), 
-      (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.offsetY ?? 0),
+      (event instanceof MouseEvent ? event.pageX : event.touches[0].pageX),
+      (event instanceof MouseEvent ? event.pageY : event.touches[0].pageY),
     ];
     
     const fromItemHeight = (dragFromInfo?.targetItemElementRect?.height ?? 0);
@@ -634,7 +638,8 @@ export function useDragAndDrop<
       }
     }
 
-    const ref = target.ref;
+    const ref = target?.ref;
+    if (ref === undefined) return;
 
     if (!isPressing) return;
     if (!isDragTargetThisRef(ref, event) && !isHandling) {
@@ -653,6 +658,8 @@ export function useDragAndDrop<
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
     const dragFromInfo = getDragFromInfo();
     
+    console.log('@isHandling', isHandling);
+
     const destinationIndex = isHandling ? (dragFromInfo?.targetIndex ?? 0) : (dragDestinationTargetIndexInfo?.index ?? 0);
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
 
@@ -662,7 +669,7 @@ export function useDragAndDrop<
       targetIndex: destinationIndex,
       targetItemElement: null,
       targetItemElementRect: undefined,
-      ref: target.ref,
+      ref,
       clientX: event instanceof MouseEvent ? event.clientX : event.touches[0].clientX,
       clientY: event instanceof MouseEvent ? event.clientY : event.touches[0].clientY,
       pageX: event instanceof MouseEvent ? event.pageX : event.touches[0].pageX,
@@ -670,9 +677,9 @@ export function useDragAndDrop<
       offsetX: 0,
       offsetY: 0,
     };
-    if (isAlreadySetDragToInfo === false) {
-      setDragToInfo(dragToInfo);
-    }
+    // if (isAlreadySetDragToInfo === false) {
+    setDragToInfo(dragToInfo);
+    // }
 
     if (dragToInfo.name !== undefined && dragFromInfo?.name !== dragToInfo.name) {
       const name = dragToInfo.name;
