@@ -594,14 +594,22 @@ export function useDragAndDrop<
       });
     }
 
+    let isHandling = false;
     if (target === undefined) {
-      return;
+      const name = getDragFromInfo()?.name;
+      if (name === undefined) return;
+      key = name;
+      target = getList(name);
+      isHandling = true;
+      if (target === undefined) {
+        return;
+      }
     }
 
     const ref = target.ref;
 
     if (!isPressing) return;
-    if (!isDragTargetThisRef(ref, event)) {
+    if (!isDragTargetThisRef(ref, event) && !isHandling) {
       for (let i = 0; i < (ref.current?.children.length ?? 0); i++) {
         (ref.current?.children[i] as HTMLElement).style.removeProperty('transform');
       }
@@ -617,7 +625,7 @@ export function useDragAndDrop<
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
     const dragFromInfo = getDragFromInfo();
     
-    const destinationIndex = dragDestinationTargetIndexInfo?.index ?? 0;
+    const destinationIndex = isHandling ? (dragFromInfo?.targetIndex ?? 0) : (dragDestinationTargetIndexInfo?.index ?? 0);
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
 
     const dragToInfo: IUseDragAndDrop.DragInfo<T, K, E> = {
@@ -912,7 +920,7 @@ export function useDragAndDrop<
     if (typeof onEndDrag === 'function') {
       onEndDrag(dragFromInfo, dragToInfo);
     }
-  }, [body, getDragFromInfo, getDragToInfo, isPressing, isMobile, lists, onEndDrag, onListsChange]);
+  }, [isPressing, lists, getDragFromInfo, getDragToInfo, onListsChange, isMobile, onEndDrag, body]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
@@ -952,7 +960,6 @@ export function useDragAndDrop<
 
   useEffect(() => {
     if (lists.size > 0) {
-      console.log('isInit!!!');
       setIsInit(true);
     }
   }, [lists]);
@@ -1033,22 +1040,6 @@ export function useDragAndDrop<
     }, TRANSITION_DURATION + 10);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lists]);
-
-  // useEffect(() => {
-  //   const draggingFormListClassNames = draggingFormListClassName.split(' ');
-  //   const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
-  //   lists.forEach((value, name) => {
-  //     if (isDraggingFrom(name)) {
-  //       draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
-  //     } else if (isDraggingNotForm(name)) {
-  //       draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
-  //     } else {
-  //       draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
-  //       draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
-  //     }
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [lists, isPressing, isDragging]);
 
   return {
     isInit,
