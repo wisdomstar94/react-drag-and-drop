@@ -688,28 +688,6 @@ export function useDragAndDrop<
       return newLists;
     });
 
-    // setLists(prev => {
-    //   const newLists = new Map(prev);
-
-    //   if (typeof dragFromInfo?.name === 'string') {
-    //     const fromList = prev.get(dragFromInfo?.name);
-    //     if (fromList !== undefined) {
-    //       // newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
-    //       fromList.items = changeInfo.get(dragFromInfo.name) ?? [];
-    //       newLists.set(dragFromInfo?.name, fromList);
-    //     }
-    //   }
-    //   if (typeof dragToInfo?.name === 'string') {
-    //     const toList = prev.get(dragToInfo?.name);
-    //     if (toList !== undefined) {
-    //       // newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
-    //       toList.items = changeInfo.get(dragToInfo.name) ?? [];
-    //       newLists.set(dragToInfo?.name, toList);
-    //     }
-    //   }
-    //   return newLists;
-    // });
-
     setIsPressing(false);
 
     if (isMobile()) {
