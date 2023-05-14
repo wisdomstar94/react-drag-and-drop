@@ -454,43 +454,71 @@ export function useDragAndDrop<
     }
   }, [body, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisGroup, isMobile, lists, onStartDrag, setDragFromInfo, setDragToInfo]);
 
-  const prevRef = useRef<K | undefined>(undefined);
+  const prevRef = useRef<K | undefined | null>(undefined);
 
   const getCurrentCursorRefInfo = useCallback((event: MouseEvent | TouchEvent) => {
     const x = event instanceof MouseEvent ? event.pageX : event.touches[0].pageX;
     const y = event instanceof MouseEvent ? event.pageY : event.touches[0].pageY;
 
     const elements = document.elementsFromPoint(x, y) as HTMLElement[];
-    let targetRefList: IUseDragAndDrop.List<T, K> | undefined = undefined;
-    elements.forEach((element) => {
-      lists.forEach((value, key) => {
-        if (value.ref.current === element) {
-          targetRefList = value;
+    let targetRefList: IUseDragAndDrop.List<T, K> | undefined;
+  
+    for (const element of elements) {
+      for (const [v, k] of Array.from(lists.entries())) {
+        if (k.ref.current === element) {
+          targetRefList = k;
+          break;
         }
-      });
-    });
+      }
+    }
     
     const result = {
       targetRefList,
       isChanged: prevRef.current !== targetRefList,
     };
 
-    prevRef.current = targetRefList;
+    prevRef.current = targetRefList?.ref.current;
     return result;
   }, [lists]);
 
   const onMovingTargetRef = useCallback((key: E | undefined, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
     const currentCursorRefInfo = getCurrentCursorRefInfo(event);
+
+    let isAlreadySetDragToInfo = false;
+    
     if (currentCursorRefInfo.isChanged) {
+      if (currentCursorRefInfo.targetRefList !== undefined) {
+        const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(currentCursorRefInfo.targetRefList.ref, event);
+        const destinationIndex = (dragDestinationTargetIndexInfo?.index ?? 0);
+        const dragToInfo: IUseDragAndDrop.DragInfo<T, K, E> = {
+          name: key,
+          item: currentCursorRefInfo.targetRefList.items.at(destinationIndex),
+          targetIndex: destinationIndex,
+          targetItemElement: null,
+          targetItemElementRect: undefined,
+          ref: currentCursorRefInfo.targetRefList.ref,
+          clientX: event instanceof MouseEvent ? event.clientX : event.touches[0].clientX,
+          clientY: event instanceof MouseEvent ? event.clientY : event.touches[0].clientY,
+          pageX: event instanceof MouseEvent ? event.pageX : event.touches[0].pageX,
+          pageY: event instanceof MouseEvent ? event.pageY : event.touches[0].pageY,
+          offsetX: 0,
+          offsetY: 0,
+        };
+        setDragToInfo(dragToInfo);
+        isAlreadySetDragToInfo = true;
+      }
+
+      const dragFromInfo = getDragFromInfo();
+      const dragToInfo = getDragToInfo();
+
       lists.forEach((_, name) => {
-        const dragFromInfo = getDragFromInfo();
-        const dragToInfo = getDragToInfo();
         if (dragFromInfo?.name !== dragToInfo?.name) {
-          if (dragToInfo?.name === name && target !== undefined) {
+          if (dragToInfo?.name === name && currentCursorRefInfo.targetRefList !== undefined) {
             return;
           }
         }
         if (dragFromInfo === undefined) return;
+        if (dragFromInfo.name === dragToInfo?.name) return;
         const listLayout = getListLayout(name);
         const thisRef = getList(name)?.ref;
         const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(thisRef!, event);
@@ -507,13 +535,13 @@ export function useDragAndDrop<
                   if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
                     child.style.transform = `translateY(${height}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateY(0px)`;
                   }
                 } else {
                   if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
                     child.style.transform = `translateY(-${height}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateY(0px)`;
                   }
                 }
               } else {
@@ -533,13 +561,13 @@ export function useDragAndDrop<
                   if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
                     child.style.transform = `translateX(${width}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateX(0px)`;
                   }
                 } else {
                   if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
                     child.style.transform = `translateX(-${width}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateX(0px)`;
                   }
                 }
               } else {
@@ -567,7 +595,7 @@ export function useDragAndDrop<
                     }
                     child.style.transform = `translateX(${x}px) translateY(${y}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateX(0px) translateY(0px)`;
                   }
                 } else {
                   if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
@@ -582,7 +610,7 @@ export function useDragAndDrop<
                     }
                     child.style.transform = `translateX(${x}px) translateY(${y}px)`;
                   } else {
-                    child.style.removeProperty('transform');
+                    child.style.transform = `translateX(0px) translateY(0px)`;
                   }
                 }
               } else {
@@ -642,7 +670,9 @@ export function useDragAndDrop<
       offsetX: 0,
       offsetY: 0,
     };
-    setDragToInfo(dragToInfo);
+    if (isAlreadySetDragToInfo === false) {
+      setDragToInfo(dragToInfo);
+    }
 
     if (dragToInfo.name !== undefined && dragFromInfo?.name !== dragToInfo.name) {
       const name = dragToInfo.name;
