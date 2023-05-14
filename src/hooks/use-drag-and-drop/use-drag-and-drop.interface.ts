@@ -34,6 +34,8 @@ export declare namespace IUseDragAndDrop {
     items: T[];
     listLayout: ListLayout;
     ref: RefObject<K>;
+    isDragFrom?: boolean;
+    isDragTo?: boolean;
   }
 
   export interface Props<T, K extends HTMLElement, E extends string> {

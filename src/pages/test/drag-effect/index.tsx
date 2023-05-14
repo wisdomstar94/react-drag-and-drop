@@ -37,16 +37,70 @@ export default function DragEffectTestPage() {
           },
         },
       ],
+      [
+        'cList',
+        {
+          ref: createRef<HTMLDivElement>(),
+          items: [
+            { name: 'c', value: 'c', },
+            { name: 'ccc', value: 'ccc', },
+            { name: 'ccccc', value: 'ccccc', },
+            { name: 'ccccccc', value: 'ccccccc', },
+          ],
+          listLayout: {
+            type: 'fixed-col-count-grid',
+            fixedColCount: 2,
+          },
+        },
+      ],
+      [
+        'dList',
+        {
+          ref: createRef<HTMLDivElement>(),
+          items: [
+            { name: 'd', value: 'd', },
+            { name: 'ddd', value: 'ddd', },
+            { name: 'ddddd', value: 'ddddd', },
+            { name: 'ddddddd', value: 'ddddddd', },
+          ],
+          listLayout: {
+            type: 'fixed-col-count-grid',
+            fixedColCount: 2,
+          },
+        },
+      ],
+      [
+        'eList',
+        {
+          ref: createRef<HTMLDivElement>(),
+          items: [
+            { name: 'e', value: 'e', },
+            { name: 'eee', value: 'eee', },
+            { name: 'eeeee', value: 'eeeee', },
+            { name: 'eeeeeee', value: 'eeeeeee', },
+          ],
+          listLayout: {
+            type: 'fixed-col-count-grid',
+            fixedColCount: 2,
+          },
+        },
+      ],
     ],
     draggingItemClassName: styles['drag-from-item-effect'],
   });
 
   return (
     <>
-      <div className="w-full grid grid-cols-2 gap-2">
+      <div className="w-full grid grid-cols-5 gap-12">
         <div>
           <div className="w-full box-border relative">
-            <div ref={dnd.getList('aList')?.ref} className="bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start">
+            <div 
+              ref={dnd.getList('aList')?.ref} 
+              className={[
+                "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
+                dnd.isNotDraggingForm('aList') ? styles['from-item-list-expect-other-list-active'] : '',
+                dnd.isDraggingFrom('aList') ? styles['from-item-list-active'] : '',
+              ].join(' ')}>
               {
                 dnd.getList('aList')?.items.map((item) => (
                   <div className="inline-flex" key={item.value}>
@@ -67,9 +121,96 @@ export default function DragEffectTestPage() {
 
         <div>
           <div className="w-full box-border relative">
-            <div ref={dnd.getList('bList')?.ref} className="bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start">
+            <div 
+              ref={dnd.getList('bList')?.ref} 
+              className={[
+                "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
+                dnd.isNotDraggingForm('bList') ? styles['from-item-list-expect-other-list-active'] : '',
+                dnd.isDraggingFrom('bList') ? styles['from-item-list-active'] : '',
+              ].join(' ')}>
               {
                 dnd.getList('bList')?.items.map((item) => (
+                  <div className="inline-flex" key={item.value}>
+                    <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                      <div data-is-dnd-handler={true} className="cursor-move">
+                        :::
+                      </div>
+                      <div>
+                        { item.name }
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="w-full box-border relative">
+            <div 
+              ref={dnd.getList('cList')?.ref} 
+              className={[
+                "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
+                dnd.isNotDraggingForm('cList') ? styles['from-item-list-expect-other-list-active'] : '',
+                dnd.isDraggingFrom('cList') ? styles['from-item-list-active'] : '',
+              ].join(' ')}>
+              {
+                dnd.getList('cList')?.items.map((item) => (
+                  <div className="inline-flex" key={item.value}>
+                    <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                      <div data-is-dnd-handler={true} className="cursor-move">
+                        :::
+                      </div>
+                      <div>
+                        { item.name }
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="w-full box-border relative">
+            <div 
+              ref={dnd.getList('dList')?.ref} 
+              className={[
+                "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
+                dnd.isNotDraggingForm('dList') ? styles['from-item-list-expect-other-list-active'] : '',
+                dnd.isDraggingFrom('dList') ? styles['from-item-list-active'] : '',
+              ].join(' ')}>
+              {
+                dnd.getList('dList')?.items.map((item) => (
+                  <div className="inline-flex" key={item.value}>
+                    <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
+                      <div data-is-dnd-handler={true} className="cursor-move">
+                        :::
+                      </div>
+                      <div>
+                        { item.name }
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="w-full box-border relative">
+            <div 
+              ref={dnd.getList('eList')?.ref} 
+              className={[
+                "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
+                dnd.isNotDraggingForm('eList') ? styles['from-item-list-expect-other-list-active'] : '',
+                dnd.isDraggingFrom('eList') ? styles['from-item-list-active'] : '',
+              ].join(' ')}>
+              {
+                dnd.getList('eList')?.items.map((item) => (
                   <div className="inline-flex" key={item.value}>
                     <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
                       <div data-is-dnd-handler={true} className="cursor-move">

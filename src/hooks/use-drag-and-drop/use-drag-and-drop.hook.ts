@@ -334,6 +334,19 @@ export function useDragAndDrop<
       offsetY: event.offsetY,
     };
 
+    if (dragInfo.name !== undefined) {
+      const name = dragInfo.name;
+      setLists(prev => {
+        const newLists = new Map(prev);
+        const targetList = newLists.get(name);
+        if (targetList !== undefined) {
+          targetList.isDragFrom = true;
+          newLists.set(name, targetList);
+        }
+        return newLists;
+      });
+    }
+
     setIsPressing(true);
     setDragFromInfo(dragInfo);
     setDragToInfo({
@@ -399,7 +412,7 @@ export function useDragAndDrop<
     const destinationIndex = dragDestinationTargetIndexInfo?.index ?? 0;
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
 
-    setDragToInfo({
+    const dragToInfo: IUseDragAndDrop.DragInfo<T, K, E> = {
       name: key,
       item: target?.items?.at(destinationIndex),
       targetIndex: destinationIndex,
@@ -412,7 +425,26 @@ export function useDragAndDrop<
       pageY: event instanceof MouseEvent ? event.pageY : event.touches[0].pageY,
       offsetX: 0,
       offsetY: 0,
-    });
+    };
+    setDragToInfo(dragToInfo);
+
+    if (dragToInfo.name !== undefined && dragFromInfo?.name !== dragToInfo.name) {
+      const name = dragToInfo.name;
+      setLists(prev => {
+        const prevLists =new Map(prev); 
+        const newLists = new Map(prev);
+        prevLists.forEach((value, key) => {
+          if (key === dragFromInfo?.name) {
+            newLists.set(key, value);
+            return;
+          }
+          value.isDragTo = key === name;
+          newLists.set(key, value);
+          return;
+        });
+        return newLists;
+      });
+    }
 
     if (isSameFromDragRefEqualThisRef(ref)) {
       switch (dragDestinationTargetIndexInfo.layoutType) {
@@ -633,27 +665,48 @@ export function useDragAndDrop<
     if (typeof onListsChange === 'function') {
       onListsChange(changeInfo);
     }
-    setLists(prev => {
-      const newLists = new Map(prev);
 
-      if (typeof dragFromInfo?.name === 'string') {
-        const fromList = prev.get(dragFromInfo?.name);
-        if (fromList !== undefined) {
-          // newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
-          fromList.items = changeInfo.get(dragFromInfo.name) ?? [];
-          newLists.set(dragFromInfo?.name, fromList);
+    setLists(prev => {
+      const prevLists =new Map(prev); 
+      const newLists = new Map(prev);
+      prevLists.forEach((value, key) => {
+        value.isDragFrom = undefined;
+        value.isDragTo = undefined;
+
+        if (key === dragFromInfo?.name) {
+          value.items = changeInfo.get(dragFromInfo.name) ?? [];
         }
-      }
-      if (typeof dragToInfo?.name === 'string') {
-        const toList = prev.get(dragToInfo?.name);
-        if (toList !== undefined) {
-          // newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
-          toList.items = changeInfo.get(dragToInfo.name) ?? [];
-          newLists.set(dragToInfo?.name, toList);
+
+        if (key === dragToInfo?.name) {
+          value.items = changeInfo.get(dragToInfo.name) ?? [];
         }
-      }
+
+        newLists.set(key, value);
+      });
       return newLists;
     });
+
+    // setLists(prev => {
+    //   const newLists = new Map(prev);
+
+    //   if (typeof dragFromInfo?.name === 'string') {
+    //     const fromList = prev.get(dragFromInfo?.name);
+    //     if (fromList !== undefined) {
+    //       // newLists[dragFromInfo.name].items = changeInfo.get(dragFromInfo.name) ?? []; 
+    //       fromList.items = changeInfo.get(dragFromInfo.name) ?? [];
+    //       newLists.set(dragFromInfo?.name, fromList);
+    //     }
+    //   }
+    //   if (typeof dragToInfo?.name === 'string') {
+    //     const toList = prev.get(dragToInfo?.name);
+    //     if (toList !== undefined) {
+    //       // newLists[dragToInfo.name].items = changeInfo.get(dragToInfo.name) ?? [];
+    //       toList.items = changeInfo.get(dragToInfo.name) ?? [];
+    //       newLists.set(dragToInfo?.name, toList);
+    //     }
+    //   }
+    //   return newLists;
+    // });
 
     setIsPressing(false);
 
@@ -684,6 +737,15 @@ export function useDragAndDrop<
       return newLists;
     });
   }, []);
+
+  const isNotDraggingForm = useCallback((name: E) => {
+    return isPressing && isDragging && getList(name)?.isDragFrom !== true;
+  }, [getList, isDragging, isPressing]);
+
+  const isDraggingFrom = useCallback((name: E) => {
+    if (getList(name)?.isDragFrom === undefined) return false;
+    return isPressing && isDragging && getList(name)?.isDragFrom === true;
+  }, [getList, isDragging, isPressing]);
 
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
@@ -747,6 +809,8 @@ export function useDragAndDrop<
     isInit,
     isPressing,
     isDragging,
+    isNotDraggingForm,
+    isDraggingFrom,
     getList,
     setItems,
   };
