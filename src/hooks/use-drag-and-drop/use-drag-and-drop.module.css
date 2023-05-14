@@ -1,0 +1,4 @@
+.item-transition {
+  transition: 0.3s all;
+  transition-timing-function: cubic-bezier(.08,.55,.26,1);
+}

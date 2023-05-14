@@ -2,6 +2,9 @@ import { RefObject, createRef, useCallback, useEffect, useMemo, useRef, useState
 import { IUseDragAndDrop } from "./use-drag-and-drop.interface";
 import { useBody } from "@/hooks/use-body/use-body.hook";
 import useAddEventListener from "@/hooks/use-add-event-listener/use-add-event-listener.hook";
+import styles from './use-drag-and-drop.module.css';
+
+const TRANSITION_DURATION = 300; // use-drag-and-drop.module.css 내용에 맞춰주세요.
 
 export function useDragAndDrop<
   T, 
@@ -149,6 +152,38 @@ export function useDragAndDrop<
     const dragFromInfo = getDragFromInfo();
     return dragFromInfo?.ref.current === ref.current;
   }, [getDragFromInfo]);
+
+  const getList = useCallback((key: E) => {
+    if (lists === undefined) return undefined;
+    return lists.get(key);
+  }, [lists]);
+
+  const setItems = useCallback((key: E, items: T[]) => {
+    setLists(prev => {
+      const newLists = new Map(prev);
+      const keyList = prev.get(key);
+      if (keyList === undefined) {
+        return newLists;
+      }
+      keyList.items = items;
+      newLists.set(key, keyList);
+      return newLists;
+    });
+  }, []);
+
+  const isDraggingNotForm = useCallback((name: E) => {
+    return isPressing && isDragging && getList(name)?.isDragFrom !== true;
+  }, [getList, isDragging, isPressing]);
+
+  const isDraggingFrom = useCallback((name: E) => {
+    if (getList(name)?.isDragFrom === undefined) return false;
+    return isPressing && isDragging && getList(name)?.isDragFrom === true;
+  }, [getList, isDragging, isPressing]);
+
+  const getListLayout = useCallback((name: E) => {
+    const list = getList(name);
+    return list?.listLayout;
+  }, [getList]);
 
   const getItemElement = useCallback((ref: RefObject<HTMLElement> | undefined, event: PointerEvent) => {
     const element = event.target as HTMLElement | null | undefined;
@@ -361,6 +396,12 @@ export function useDragAndDrop<
     Array.from(lists.entries()).forEach(([key, value]) => {
       const item = value;
       if (item.ref.current === null) return;
+      for (let i = 0; i < item.ref.current.children.length; i++) {
+        const child = item.ref.current.children[i] as HTMLElement;
+        if (child !== dragInfo.targetItemElement) {
+          child.classList.add(styles['item-transition']);
+        }
+      }
       if (item.ref === dragFirstStartFromInfo?.info.ref) {
         let currentElement: HTMLElement | null | undefined = item.ref.current;
         for (let i = 0; i < 2; i++) {
@@ -447,6 +488,111 @@ export function useDragAndDrop<
         return newLists;
       });
     }
+
+    lists.forEach((value, name) => {
+      if (name === dragToInfo.name) {
+        return;
+      }
+      const listLayout = getListLayout(name);
+      const thisRef = getList(name)?.ref;
+      switch (listLayout?.type) {
+        case 'one-col-infinite': {
+          const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
+          const children = thisRef?.current?.children ?? [];
+          for (let i = dragFromInfo?.name === name ? dragFromInfo.targetIndex + 1 : 0; i < children.length; i++) {
+            const child = children[i] as HTMLElement;
+            if (child === dragFromInfo?.targetItemElement) continue;
+            const destinationIndex = 9999999999;
+            if (thisRef === dragFromInfo?.ref) {
+              if (destinationIndex < dragStartIndex) {
+                if (i >= destinationIndex && i <= dragStartIndex) {
+                  child.style.transform = `translateY(${height}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              } else {
+                if (i >= dragStartIndex && i <= destinationIndex) {
+                  child.style.transform = `translateY(-${height}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              }
+            } else {
+              child.style.transform = `translateY(0px)`;
+            }
+          }
+        } break;
+        case 'one-row-infinite': {
+          const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
+          const children = thisRef?.current?.children ?? [];
+          for (let i = dragFromInfo?.name === name ? dragFromInfo.targetIndex + 1 : 0; i < children.length; i++) {
+            const child = children[i] as HTMLElement;
+            if (child === dragFromInfo?.targetItemElement) continue;
+            const destinationIndex = 9999999999;
+            if (thisRef === dragFromInfo?.ref) {
+              if (destinationIndex < dragStartIndex) {
+                if (i >= destinationIndex && i <= dragStartIndex) {
+                  child.style.transform = `translateX(${width}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              } else {
+                if (i >= dragStartIndex && i <= destinationIndex) {
+                  child.style.transform = `translateX(-${width}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              }
+            } else {
+              child.style.transform = `translateX(0px)`;
+            }
+          }
+        } break;
+        case 'fixed-col-count-grid': {
+          const children = thisRef?.current?.children ?? [];
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i] as HTMLElement;
+            if (child === dragFromInfo?.targetItemElement) continue;
+            const destinationIndex = 9999999999;
+            if (thisRef === dragFromInfo?.ref) {
+              if (destinationIndex < dragStartIndex) {
+                if (i >= destinationIndex && i <= dragStartIndex) {
+                  let x = 0;
+                  let y = 0;
+                  const virtualIndex = i + 1;
+                  if (virtualIndex % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                    x = -((i % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                    y = dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                  } else {
+                    x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                  }
+                  child.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              } else {
+                if (i >= dragStartIndex && i <= destinationIndex) {
+                  let x = 0;
+                  let y = 0;
+                  const virtualIndex = i - 1;
+                  if (i % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                    x = ((virtualIndex % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                    y = -dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                  } else {
+                    x = -dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                  }
+                  child.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                } else {
+                  child.style.removeProperty('transform');
+                }
+              }
+            } else {
+              child.style.transform = `translateX(0px) translateY(0px)`;
+            }
+          }
+        } break;
+      }
+    });
 
     if (isSameFromDragRefEqualThisRef(ref)) {
       switch (dragDestinationTargetIndexInfo.layoutType) {
@@ -588,7 +734,7 @@ export function useDragAndDrop<
         } break;
       }
     }
-  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, isDragTargetThisRef, isPressing, isSameFromDragRefEqualThisRef, onDestinationActiveListName, setDragToInfo]);
+  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, getList, getListLayout, isDragTargetThisRef, isPressing, isSameFromDragRefEqualThisRef, lists, onDestinationActiveListName, setDragToInfo]);
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isPressing) return;
@@ -700,33 +846,6 @@ export function useDragAndDrop<
     }
   }, [body, getDragFromInfo, getDragToInfo, isPressing, isMobile, lists, onEndDrag, onListsChange]);
 
-  const getList = useCallback((key: E) => {
-    if (lists === undefined) return undefined;
-    return lists.get(key);
-  }, [lists]);
-
-  const setItems = useCallback((key: E, items: T[]) => {
-    setLists(prev => {
-      const newLists = new Map(prev);
-      const keyList = prev.get(key);
-      if (keyList === undefined) {
-        return newLists;
-      }
-      keyList.items = items;
-      newLists.set(key, keyList);
-      return newLists;
-    });
-  }, []);
-
-  const isDraggingNotForm = useCallback((name: E) => {
-    return isPressing && isDragging && getList(name)?.isDragFrom !== true;
-  }, [getList, isDragging, isPressing]);
-
-  const isDraggingFrom = useCallback((name: E) => {
-    if (getList(name)?.isDragFrom === undefined) return false;
-    return isPressing && isDragging && getList(name)?.isDragFrom === true;
-  }, [getList, isDragging, isPressing]);
-
   useAddEventListener({
     targetElementRef: { current: typeof window !== 'undefined' ? window : null },
     eventName: 'pointerdown',
@@ -782,7 +901,17 @@ export function useDragAndDrop<
   useEffect(() => {
     if (isPressing === false) {
       setIsDragging(false);
+      lists.forEach((value, key) => {
+        const children = value.ref.current?.children;
+        if (children !== undefined) {
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i] as HTMLElement;
+            child.classList.remove(styles['item-transition']);
+          }
+        }
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPressing]);
 
   useEffect(() => {

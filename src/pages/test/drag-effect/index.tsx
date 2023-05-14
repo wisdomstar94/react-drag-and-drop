@@ -37,54 +37,54 @@ export default function DragEffectTestPage() {
           },
         },
       ],
-      [
-        'cList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'c', value: 'c', },
-            { name: 'ccc', value: 'ccc', },
-            { name: 'ccccc', value: 'ccccc', },
-            { name: 'ccccccc', value: 'ccccccc', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
-      [
-        'dList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'd', value: 'd', },
-            { name: 'ddd', value: 'ddd', },
-            { name: 'ddddd', value: 'ddddd', },
-            { name: 'ddddddd', value: 'ddddddd', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
-      [
-        'eList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'e', value: 'e', },
-            { name: 'eee', value: 'eee', },
-            { name: 'eeeee', value: 'eeeee', },
-            { name: 'eeeeeee', value: 'eeeeeee', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
+      // [
+      //   'cList',
+      //   {
+      //     ref: createRef<HTMLDivElement>(),
+      //     items: [
+      //       { name: 'c', value: 'c', },
+      //       { name: 'ccc', value: 'ccc', },
+      //       { name: 'ccccc', value: 'ccccc', },
+      //       { name: 'ccccccc', value: 'ccccccc', },
+      //     ],
+      //     listLayout: {
+      //       type: 'fixed-col-count-grid',
+      //       fixedColCount: 2,
+      //     },
+      //   },
+      // ],
+      // [
+      //   'dList',
+      //   {
+      //     ref: createRef<HTMLDivElement>(),
+      //     items: [
+      //       { name: 'd', value: 'd', },
+      //       { name: 'ddd', value: 'ddd', },
+      //       { name: 'ddddd', value: 'ddddd', },
+      //       { name: 'ddddddd', value: 'ddddddd', },
+      //     ],
+      //     listLayout: {
+      //       type: 'fixed-col-count-grid',
+      //       fixedColCount: 2,
+      //     },
+      //   },
+      // ],
+      // [
+      //   'eList',
+      //   {
+      //     ref: createRef<HTMLDivElement>(),
+      //     items: [
+      //       { name: 'e', value: 'e', },
+      //       { name: 'eee', value: 'eee', },
+      //       { name: 'eeeee', value: 'eeeee', },
+      //       { name: 'eeeeeee', value: 'eeeeeee', },
+      //     ],
+      //     listLayout: {
+      //       type: 'fixed-col-count-grid',
+      //       fixedColCount: 2,
+      //     },
+      //   },
+      // ],
     ],
     draggingItemClassName: styles['drag-from-item-effect'],
     draggingFormListClassName: styles['from-item-list-active'],
@@ -105,7 +105,7 @@ export default function DragEffectTestPage() {
               ].join(' ')}>
               {
                 dnd.getList('aList')?.items.map((item) => (
-                  <div className="inline-flex" key={item.value}>
+                  <div className="inline-flex text-xs" key={item.value}>
                     <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
                       <div data-is-dnd-handler={true} className="cursor-move">
                         :::
@@ -132,7 +132,7 @@ export default function DragEffectTestPage() {
               ].join(' ')}>
               {
                 dnd.getList('bList')?.items.map((item) => (
-                  <div className="inline-flex" key={item.value}>
+                  <div className="inline-flex text-xs" key={item.value}>
                     <div className="inline-flex flex-row gap-2 border border-slate-300 p-2 rounded-lg bg-white w-full">
                       <div data-is-dnd-handler={true} className="cursor-move">
                         :::
@@ -148,14 +148,12 @@ export default function DragEffectTestPage() {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <div className="w-full box-border relative">
             <div 
               ref={dnd.getList('cList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                // dnd.isDraggingNotForm('cList') ? styles['from-item-list-expect-other-list-active'] : '',
-                // dnd.isDraggingFrom('cList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('cList')?.items.map((item) => (
@@ -181,8 +179,6 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('dList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                // dnd.isDraggingNotForm('dList') ? styles['from-item-list-expect-other-list-active'] : '',
-                // dnd.isDraggingFrom('dList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('dList')?.items.map((item) => (
@@ -208,8 +204,6 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('eList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-                // dnd.isDraggingNotForm('eList') ? styles['from-item-list-expect-other-list-active'] : '',
-                // dnd.isDraggingFrom('eList') ? styles['from-item-list-active'] : '',
               ].join(' ')}>
               {
                 dnd.getList('eList')?.items.map((item) => (
@@ -227,7 +221,7 @@ export default function DragEffectTestPage() {
               }
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );
