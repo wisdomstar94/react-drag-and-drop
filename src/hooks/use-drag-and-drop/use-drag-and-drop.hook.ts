@@ -29,6 +29,7 @@ export function useDragAndDrop<
   const [isInit, setIsInit] = useState<boolean>(false);
   const [isPressing, setIsPressing] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const isFinalTransitioning = useRef<boolean>(false);
 
   const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
 
@@ -346,6 +347,7 @@ export function useDragAndDrop<
   const onPressStart = useCallback((event: PointerEvent) => {
     if (!isDnDHandler(event)) return;
     if (!isDnDHandlerThisGroup(event)) return;
+    if (isFinalTransitioning.current) return;
   
     const dragFirstStartFromInfo = getDragFirstStartFromInfo(event);
     const itemElement = getItemElement(dragFirstStartFromInfo?.info.ref, event);
@@ -745,7 +747,15 @@ export function useDragAndDrop<
     if (lists === undefined) return;
 
     const dragFromInfo = getDragFromInfo();
-
+    if (dragFromInfo !== undefined) {
+      const [x, y] = getElementAbsoluteXY(dragFromInfo.targetItemElement);
+      setDragFromInfo({
+        ...dragFromInfo,
+        latestAbsoluteX: x,
+        latestAbsoluteY: y,
+      });
+    }
+    
     const diffX = ((event instanceof MouseEvent) ? event.pageX : event.touches[0].pageX) - (dragFromInfo?.pageX ?? 0);
     const diffY = ((event instanceof MouseEvent) ? event.pageY : event.touches[0].pageY) - (dragFromInfo?.pageY ?? 0);
 
@@ -762,7 +772,7 @@ export function useDragAndDrop<
     }) ?? [undefined , undefined];
 
     onMovingTargetRef(key, target, event);
-  }, [getDragFromInfo, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isIncludePointRangeTargetCursor, isPressing, lists, onMovingTargetRef]);
+  }, [getDragFromInfo, getElementAbsoluteXY, getEventCursorAbsoluteXY, getRefAbsolutePointRange, isIncludePointRangeTargetCursor, isPressing, lists, onMovingTargetRef, setDragFromInfo]);
 
   const onPressEnd = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isPressing) return;
@@ -919,21 +929,73 @@ export function useDragAndDrop<
   }, [isPressing]);
 
   useEffect(() => {
-    const draggingFormListClassNames = draggingFormListClassName.split(' ');
-    const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
+    if (isPressing) return;
+    if (!isDragging) return;
+    const dragFromInfo = getDragFromInfo();
+    const dragToInfo = getDragToInfo();
 
-    lists.forEach((value, name) => {
-      if (isDraggingFrom(name)) {
-        draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
-      } else if (isDraggingNotForm(name)) {
-        draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
-      } else {
-        draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
-        draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
-      }
-    });
+    if (dragFromInfo === undefined) return;
+    if (dragToInfo === undefined) return;
+
+    // console.log('dragFromInfo.latesAbsolutetXY', [dragFromInfo.latestAbsoluteX, dragFromInfo.latestAbsoluteY]);
+    const moveBeforeDot = [dragFromInfo.latestAbsoluteX ?? 0, dragFromInfo.latestAbsoluteY ?? 0];
+    console.log('@moveBeforeDot', moveBeforeDot);
+
+    const dragToRefChildren = dragToInfo.ref.current?.children ?? [];
+    const dragToTargetIndex = dragToRefChildren.length - 1 < dragToInfo.targetIndex ? dragToRefChildren.length - 1 : dragToInfo.targetIndex;
+
+    const child = dragToRefChildren[dragToTargetIndex] as HTMLElement;
+    console.log('@@@dragToRefChildren', dragToRefChildren);
+    // console.log('@@@dragToInfo.targetIndex', dragToInfo.targetIndex);
+    console.log('@@@child', child);
+    const moveAfterDot = getElementAbsoluteXY(child);
+    console.log('@moveAfterDot', moveAfterDot);
+
+    const diff = [moveBeforeDot[0] - moveAfterDot[0], moveBeforeDot[1] - moveAfterDot[1]];
+    
+    isFinalTransitioning.current = true;
+    child.style.zIndex = '2';
+    child.style.transform = `translateX(${diff[0]}px) translateY(${diff[1]}px)`;
+    setTimeout(() => {
+      child.classList.add(styles['item-transition']);
+    }, 20);
+    setTimeout(() => {
+      child.style.transform = `translateX(0px) translateY(0px)`;
+    }, 40);
+    setTimeout(() => {
+      const draggingFormListClassNames = draggingFormListClassName.split(' ');
+      const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
+      lists.forEach((value, name) => {
+        if (isDraggingFrom(name)) {
+          draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+        } else if (isDraggingNotForm(name)) {
+          draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+        } else {
+          draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+          draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+        }
+      });
+      isFinalTransitioning.current = false;
+      child.style.zIndex = '1';
+    }, TRANSITION_DURATION + 10);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lists, isPressing, isDragging]);
+  }, [lists]);
+
+  // useEffect(() => {
+  //   const draggingFormListClassNames = draggingFormListClassName.split(' ');
+  //   const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
+  //   lists.forEach((value, name) => {
+  //     if (isDraggingFrom(name)) {
+  //       draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+  //     } else if (isDraggingNotForm(name)) {
+  //       draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
+  //     } else {
+  //       draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+  //       draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
+  //     }
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [lists, isPressing, isDragging]);
 
   return {
     isInit,

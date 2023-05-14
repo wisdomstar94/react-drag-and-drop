@@ -22,6 +22,8 @@ export declare namespace IUseDragAndDrop {
     pageY: number;
     offsetX: number;
     offsetY: number;
+    latestAbsoluteX?: number;
+    latestAbsoluteY?: number;
   }
 
   export interface ListLayout {
