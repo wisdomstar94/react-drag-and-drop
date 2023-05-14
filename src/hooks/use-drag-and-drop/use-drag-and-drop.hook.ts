@@ -432,113 +432,145 @@ export function useDragAndDrop<
     }
   }, [body, getDragFirstStartFromInfo, getElementIndex, getItemElement, isDnDHandler, isDnDHandlerThisGroup, isMobile, lists, onStartDrag, setDragFromInfo, setDragToInfo]);
 
-  const onMovingTargetRef = useCallback((key: E | undefined, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
-    lists.forEach((value, name) => {
-      const dragFromInfo = getDragFromInfo();
-      const dragToInfo = getDragToInfo();
-      if (dragToInfo?.name === name) return;
-      if (dragFromInfo === undefined) return;
-      const listLayout = getListLayout(name);
-      const thisRef = getList(name)?.ref;
-      const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(thisRef!, event);
-      switch (listLayout?.type) {
-        case 'one-col-infinite': {
-          const height = getDragFromInfo()?.targetItemElementRect?.height ?? 0;
-          const children = thisRef?.current?.children ?? [];
-          for (let i = 0; i < children.length; i++) {
-            const child = children[i] as HTMLElement;
-            if (child === dragFromInfo?.targetItemElement) continue;
-            const destinationIndex = 9999999999;
-            if (thisRef === dragFromInfo?.ref) {
-              if (destinationIndex < dragFromInfo.targetIndex) {
-                if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
-                  child.style.transform = `translateY(${height}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              } else {
-                if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
-                  child.style.transform = `translateY(-${height}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              }
-            } else {
-              child.style.transform = `translateY(0px)`;
-            }
-          }
-        } break;
-        case 'one-row-infinite': {
-          const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
-          const children = thisRef?.current?.children ?? [];
-          for (let i = 0; i < children.length; i++) {
-            const child = children[i] as HTMLElement;
-            if (child === dragFromInfo?.targetItemElement) continue;
-            const destinationIndex = 9999999999;
-            if (thisRef === dragFromInfo?.ref) {
-              if (destinationIndex < dragFromInfo.targetIndex) {
-                if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
-                  child.style.transform = `translateX(${width}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              } else {
-                if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
-                  child.style.transform = `translateX(-${width}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              }
-            } else {
-              child.style.transform = `translateX(0px)`;
-            }
-          }
-        } break;
-        case 'fixed-col-count-grid': {
-          const children = thisRef?.current?.children ?? [];
-          for (let i = 0; i < children.length; i++) {
-            const child = children[i] as HTMLElement;
-            if (child === dragFromInfo?.targetItemElement) continue;
-            const destinationIndex = 9999999999;
-            if (thisRef === dragFromInfo?.ref) {
-              if (destinationIndex < dragFromInfo.targetIndex) {
-                if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
-                  let x = 0;
-                  let y = 0;
-                  const virtualIndex = i + 1;
-                  if (virtualIndex % dragDestinationTargetIndexInfo.fixedColCount === 0) {
-                    x = -((i % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
-                    y = dragDestinationTargetIndexInfo.destinationRefItemHeight;
-                  } else {
-                    x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
-                  }
-                  child.style.transform = `translateX(${x}px) translateY(${y}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              } else {
-                if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
-                  let x = 0;
-                  let y = 0;
-                  const virtualIndex = i - 1;
-                  if (i % dragDestinationTargetIndexInfo.fixedColCount === 0) {
-                    x = ((virtualIndex % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
-                    y = -dragDestinationTargetIndexInfo.destinationRefItemHeight;
-                  } else {
-                    x = -dragDestinationTargetIndexInfo.destinationRefItemWidth;
-                  }
-                  child.style.transform = `translateX(${x}px) translateY(${y}px)`;
-                } else {
-                  child.style.removeProperty('transform');
-                }
-              }
-            } else {
-              child.style.transform = `translateX(0px) translateY(0px)`;
-            }
-          }
-        } break;
-      }
+  const prevRef = useRef<K | undefined>(undefined);
+
+  const getCurrentCursorRefInfo = useCallback((event: MouseEvent | TouchEvent) => {
+    const x = event instanceof MouseEvent ? event.pageX : event.touches[0].pageX;
+    const y = event instanceof MouseEvent ? event.pageY : event.touches[0].pageY;
+
+    const elements = document.elementsFromPoint(x, y) as HTMLElement[];
+    let targetRefList: IUseDragAndDrop.List<T, K> | undefined = undefined;
+    elements.forEach((element) => {
+      lists.forEach((value, key) => {
+        if (value.ref.current === element) {
+          targetRefList = value;
+        }
+      });
     });
+    
+    const result = {
+      targetRefList,
+      isChanged: prevRef.current !== targetRefList,
+    };
+
+    prevRef.current = targetRefList;
+    return result;
+  }, [lists]);
+
+  const onMovingTargetRef = useCallback((key: E | undefined, target: IUseDragAndDrop.List<T, K> | undefined, event: MouseEvent | TouchEvent) => {
+    const currentCursorRefInfo = getCurrentCursorRefInfo(event);
+    if (currentCursorRefInfo.isChanged) {
+      lists.forEach((_, name) => {
+        const dragFromInfo = getDragFromInfo();
+        const dragToInfo = getDragToInfo();
+        if (dragFromInfo?.name !== dragToInfo?.name) {
+          if (dragToInfo?.name === name && target !== undefined) {
+            return;
+          }
+        }
+        if (dragFromInfo === undefined) return;
+        const listLayout = getListLayout(name);
+        const thisRef = getList(name)?.ref;
+        const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(thisRef!, event);
+        switch (listLayout?.type) {
+          case 'one-col-infinite': {
+            const height = thisRef?.current?.firstElementChild?.getBoundingClientRect().height ?? 0;
+            const children = thisRef?.current?.children ?? [];
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement;
+              if (child === dragFromInfo?.targetItemElement) continue;
+              const destinationIndex = 9999999999;
+              if (thisRef === dragFromInfo?.ref) {
+                if (destinationIndex < dragFromInfo.targetIndex) {
+                  if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
+                    child.style.transform = `translateY(${height}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                } else {
+                  if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
+                    child.style.transform = `translateY(-${height}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                }
+              } else {
+                child.style.transform = `translateY(0px)`;
+              }
+            }
+          } break;
+          case 'one-row-infinite': {
+            const width = getDragFromInfo()?.targetItemElementRect?.width ?? 0;
+            const children = thisRef?.current?.children ?? [];
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement;
+              if (child === dragFromInfo?.targetItemElement) continue;
+              const destinationIndex = 9999999999;
+              if (thisRef === dragFromInfo?.ref) {
+                if (destinationIndex < dragFromInfo.targetIndex) {
+                  if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
+                    child.style.transform = `translateX(${width}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                } else {
+                  if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
+                    child.style.transform = `translateX(-${width}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                }
+              } else {
+                child.style.transform = `translateX(0px)`;
+              }
+            }
+          } break;
+          case 'fixed-col-count-grid': {
+            const children = thisRef?.current?.children ?? [];
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement;
+              if (child === dragFromInfo?.targetItemElement) continue;
+              const destinationIndex = 9999999999;
+              if (thisRef === dragFromInfo?.ref) {
+                if (destinationIndex < dragFromInfo.targetIndex) {
+                  if (i >= destinationIndex && i <= dragFromInfo.targetIndex) {
+                    let x = 0;
+                    let y = 0;
+                    const virtualIndex = i + 1;
+                    if (virtualIndex % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                      x = -((i % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                      y = dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                    } else {
+                      x = dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                    }
+                    child.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                } else {
+                  if (i >= dragFromInfo.targetIndex && i <= destinationIndex) {
+                    let x = 0;
+                    let y = 0;
+                    const virtualIndex = i - 1;
+                    if (i % dragDestinationTargetIndexInfo.fixedColCount === 0) {
+                      x = ((virtualIndex % dragDestinationTargetIndexInfo.fixedColCount) * dragDestinationTargetIndexInfo.destinationRefItemWidth);
+                      y = -dragDestinationTargetIndexInfo.destinationRefItemHeight;
+                    } else {
+                      x = -dragDestinationTargetIndexInfo.destinationRefItemWidth;
+                    }
+                    child.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                  } else {
+                    child.style.removeProperty('transform');
+                  }
+                }
+              } else {
+                child.style.transform = `translateX(0px) translateY(0px)`;
+              }
+            }
+          } break;
+        }
+      });
+    }
 
     if (target === undefined) {
       return;
@@ -740,7 +772,7 @@ export function useDragAndDrop<
         } break;
       }
     }
-  }, [getDragDestinationTargetIndexInfo, getDragFromInfo, getDragToInfo, getList, getListLayout, isDragTargetThisRef, isPressing, isSameFromDragRefEqualThisRef, lists, onDestinationActiveListName, setDragToInfo]);
+  }, [getCurrentCursorRefInfo, getDragDestinationTargetIndexInfo, getDragFromInfo, getDragToInfo, getList, getListLayout, isDragTargetThisRef, isPressing, isSameFromDragRefEqualThisRef, lists, onDestinationActiveListName, setDragToInfo]);
 
   const onDragging = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isPressing) return;
@@ -937,20 +969,13 @@ export function useDragAndDrop<
     if (dragFromInfo === undefined) return;
     if (dragToInfo === undefined) return;
 
-    // console.log('dragFromInfo.latesAbsolutetXY', [dragFromInfo.latestAbsoluteX, dragFromInfo.latestAbsoluteY]);
     const moveBeforeDot = [dragFromInfo.latestAbsoluteX ?? 0, dragFromInfo.latestAbsoluteY ?? 0];
-    console.log('@moveBeforeDot', moveBeforeDot);
 
     const dragToRefChildren = dragToInfo.ref.current?.children ?? [];
     const dragToTargetIndex = dragToRefChildren.length - 1 < dragToInfo.targetIndex ? dragToRefChildren.length - 1 : dragToInfo.targetIndex;
 
     const child = dragToRefChildren[dragToTargetIndex] as HTMLElement;
-    console.log('@@@dragToRefChildren', dragToRefChildren);
-    // console.log('@@@dragToInfo.targetIndex', dragToInfo.targetIndex);
-    console.log('@@@child', child);
     const moveAfterDot = getElementAbsoluteXY(child);
-    console.log('@moveAfterDot', moveAfterDot);
-
     const diff = [moveBeforeDot[0] - moveAfterDot[0], moveBeforeDot[1] - moveAfterDot[1]];
     
     isFinalTransitioning.current = true;

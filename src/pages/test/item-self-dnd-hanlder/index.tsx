@@ -45,14 +45,14 @@ export default function ItemSelfDnDHanlderTestPage() {
 
   useEffect(() => {
     // 데이터를 나중에 할당해야 하는 경우에는 아래와 같이 비동기로 데이터를 불러온 이후에 dnd.setItems 메서드로 할당 가능합니다.
-    setTimeout(() => {
-      dnd.setItems('bList', [
-        { name: 'b2', value: 'b2' },
-        { name: 'bbb2', value: 'bbb2' },
-        { name: 'bbbbb2', value: 'bbbbb2' },
-        { name: 'bbbbbbb2', value: 'bbbbbbb2' },
-      ]);
-    }, 2000);
+    // setTimeout(() => {
+    //   dnd.setItems('bList', [
+    //     { name: 'b2', value: 'b2' },
+    //     { name: 'bbb2', value: 'bbb2' },
+    //     { name: 'bbbbb2', value: 'bbbbb2' },
+    //     { name: 'bbbbbbb2', value: 'bbbbbbb2' },
+    //   ]);
+    // }, 2000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
