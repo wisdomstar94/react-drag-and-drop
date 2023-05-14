@@ -25,6 +25,9 @@ export default function Home() {
         <li>
           <Link href="/test/item-self-dnd-hanlder">/test/item-self-dnd-hanlder</Link>
         </li>
+        <li>
+          <Link href="/test/board">/test/board</Link>
+        </li>
       </ul>
     </>
   );

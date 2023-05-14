@@ -159,6 +159,10 @@ export function useDragAndDrop<
     return lists.get(key);
   }, [lists]);
 
+  const getLists = useCallback(() => {
+    return lists;
+  }, [lists]);
+
   const setItems = useCallback((key: E, items: T[]) => {
     setLists(prev => {
       const newLists = new Map(prev);
@@ -925,9 +929,15 @@ export function useDragAndDrop<
   useEffect(() => {
     if (props.lists === undefined) return;
     setLists(new Map(props.lists));
-    setIsInit(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (lists.size > 0) {
+      console.log('isInit!!!');
+      setIsInit(true);
+    }
+  }, [lists]);
 
   useEffect(() => {
     const dragFromInfo = getDragFromInfo();
@@ -1029,6 +1039,7 @@ export function useDragAndDrop<
     isDraggingNotForm,
     isDraggingFrom,
     getList,
+    getLists,
     setItems,
   };
 }

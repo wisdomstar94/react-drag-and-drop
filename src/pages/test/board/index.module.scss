@@ -1,0 +1,13 @@
+.drag-from-item-effect {
+  box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5);
+  transform: rotate(2deg);
+  transition: 0.3s all;
+}
+
+.from-item-list-expect-other-list-active {
+  @apply bg-blue-400
+}
+
+.from-item-list-active {
+  @apply bg-blue-100
+}
