@@ -118,7 +118,7 @@ export default function BoardTestPage() {
                   <div data-is-dnd-handler={true} className="cursor-move w-full">
                     :::
                   </div>
-                  <div ref={dnd.getList(item.name as any)?.ref} data-is-dnd-list={true} className="w-full flex flex-wrap content-start box-border bg-transparent">
+                  <div ref={dnd.getList(item.name as any)?.ref} data-is-dnd-list={true} className="w-full flex flex-wrap content-start box-border bg-transparent pb-52">
                     {
                       dnd.getList(item.name as any)?.items.map((_item) => {
                         return (
