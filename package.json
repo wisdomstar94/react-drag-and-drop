@@ -1,26 +1,35 @@
 {
-  "name": "react-drag-and-drop",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@wisdomstar94/react-drag-and-drop",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": false,
   "scripts": {
-    "dev": "next dev --port 3390",
+    "dev": "next dev --port 3330",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pack:build": "node ./build.esbuild.js",
+    "pack:build:tsc": "tsc --project ./tsconfig.package.json"
   },
-  "dependencies": {
-    "@types/node": "18.16.3",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.1",
-    "autoprefixer": "10.4.14",
-    "eslint": "8.39.0",
-    "eslint-config-next": "13.3.2",
-    "next": "13.3.2",
-    "postcss": "8.4.23",
+  "repository": "https://github.com/wisdomstar94/react-drag-and-drop",
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.34",
+    "@types/react-dom": "18.2.14",
+    "autoprefixer": "10.4.16",
+    "esbuild": "^0.19.5",
+    "esbuild-css-modules-plugin": "^3.0.3",
+    "eslint": "8.52.0",
+    "eslint-config-next": "14.0.1",
+    "next": "14.0.1",
+    "postcss": "8.4.31",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "sass": "^1.62.1",
-    "tailwindcss": "3.3.2",
-    "typescript": "5.0.4"
+    "sass": "^1.69.5",
+    "tailwindcss": "3.3.5",
+    "typescript": "5.2.2",
+    "@wisdomstar94/react-add-event-listener": "^0.0.5",
+    "@wisdomstar94/react-body": "^0.0.2"
   }
 }

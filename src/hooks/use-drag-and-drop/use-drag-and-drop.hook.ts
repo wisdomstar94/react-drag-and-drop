@@ -1,8 +1,8 @@
 import { RefObject, createRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IUseDragAndDrop } from "./use-drag-and-drop.interface";
-import { useBody } from "@/hooks/use-body/use-body.hook";
-import useAddEventListener from "@/hooks/use-add-event-listener/use-add-event-listener.hook";
 import styles from './use-drag-and-drop.module.css';
+import { useBody } from "@wisdomstar94/react-body";
+import { useAddEventListener } from "@wisdomstar94/react-add-event-listener";
 
 const TRANSITION_DURATION = 300; // use-drag-and-drop.module.css 내용에 맞춰주세요.
 const DATA_IS_DND_LIST = `data-is-dnd-list`;
@@ -86,6 +86,7 @@ export function useDragAndDrop<
     let firstFindedListRefElement: HTMLElement | null = null;
 
     for (let i = 0; i < 30; i++) {
+      // console.log('@currentElement', currentElement);
       if (currentElement?.getAttribute(DATA_IS_DND_HANDLER) === 'true') {
         isDndHandlerExist = true;
       }
@@ -666,7 +667,7 @@ export function useDragAndDrop<
     const dragDestinationTargetIndexInfo = getDragDestinationTargetIndexInfo(ref, event);
     const dragFromInfo = getDragFromInfo();
     
-    console.log('@isHandling', isHandling);
+    // console.log('@isHandling', isHandling);
 
     const destinationIndex = isHandling ? (dragFromInfo?.targetIndex ?? 0) : (dragDestinationTargetIndexInfo?.index ?? 0);
     const dragStartIndex = dragFromInfo?.targetIndex ?? 0;
@@ -968,33 +969,38 @@ export function useDragAndDrop<
   }, [isPressing, lists, getDragFromInfo, getDragToInfo, onListsChange, isMobile, onEndDrag, body]);
 
   useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'pointerdown',
-    eventListener: onPressStart,
+    windowEventRequiredInfo: {
+      eventName: 'pointerdown',
+      eventListener: onPressStart,  
+    },
   });
 
   useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'mousemove',
-    eventListener: onDragging,
+    windowEventRequiredInfo: {
+      eventName: 'mousemove',
+      eventListener: onDragging,
+    }
   });
 
   useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'touchmove',
-    eventListener: onDragging,
+    windowEventRequiredInfo: {
+      eventName: 'touchmove',
+      eventListener: onDragging,
+    }
   });
 
   useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'mouseup',
-    eventListener: onPressEnd,
+    windowEventRequiredInfo: {
+      eventName: 'mouseup',
+      eventListener: onPressEnd,
+    }
   });
 
   useAddEventListener({
-    targetElementRef: { current: typeof window !== 'undefined' ? window : null },
-    eventName: 'touchend',
-    eventListener: onPressEnd,
+    windowEventRequiredInfo: {
+      eventName: 'touchend',
+      eventListener: onPressEnd,
+    }
   });
 
   useEffect(() => {
