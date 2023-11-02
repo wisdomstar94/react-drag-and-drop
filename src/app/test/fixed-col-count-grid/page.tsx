@@ -45,7 +45,7 @@ export default function FixedColCountGridTestPage() {
       <div className="w-full grid grid-cols-2 gap-2">
         <div>
           <div className="w-full box-border relative">
-            <div ref={dnd.getList('aList')?.ref} className="bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start">
+            <div ref={dnd.getList('aList')?.ref} className="bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start" data-is-dnd-list={true}>
               {
                 dnd.getList('aList')?.items.map((item) => (
                   <div className="inline-flex" key={item.value}>

@@ -195,7 +195,7 @@ export function useDragAndDrop<
     });
   }, []);
 
-  const isDraggingNotForm = useCallback((name: E) => {
+  const isDraggingNotFrom = useCallback((name: E) => {
     return isPressing && isDragging && getList(name)?.isDragFrom !== true;
   }, [getList, isDragging, isPressing]);
 
@@ -885,6 +885,12 @@ export function useDragAndDrop<
   const onPressEnd = useCallback((event: MouseEvent | TouchEvent) => {
     if (!isPressing) return;
     if (lists === undefined) return;
+    // console.log('@event', event);
+
+    const dragFromInfo = getDragFromInfo();
+    const dragToInfo = getDragToInfo();
+
+    // console.log('!dragFromInfo?.ref.current', dragFromInfo?.ref.current);
 
     Array.from(lists.entries()).forEach(([k, v]) => {
       const item = v;
@@ -903,9 +909,6 @@ export function useDragAndDrop<
         child.style.removeProperty('transform');
       }
     });
-
-    const dragFromInfo = getDragFromInfo();
-    const dragToInfo = getDragToInfo();
 
     const destinationList = dragToInfo?.name === undefined ? [] : lists?.get(dragToInfo?.name)?.items ?? [];
     const copyDestinationList = [ ...destinationList ];
@@ -937,7 +940,7 @@ export function useDragAndDrop<
     }
 
     setLists(prev => {
-      const prevLists =new Map(prev); 
+      const prevLists = new Map(prev); 
       const newLists = new Map(prev);
       prevLists.forEach((value, key) => {
         value.isDragFrom = undefined;
@@ -960,6 +963,8 @@ export function useDragAndDrop<
 
     if (isMobile()) {
       body.allowScroll();
+      body.allowTextDrag();
+    } else {
       body.allowTextDrag();
     }
 
@@ -1033,12 +1038,15 @@ export function useDragAndDrop<
   useEffect(() => {
     if (isPressing === false) {
       setIsDragging(false);
+      const dragFromInfo = getDragFromInfo();
       lists.forEach((value, key) => {
         const children = value.ref.current?.children;
         if (children !== undefined) {
           for (let i = 0; i < children.length; i++) {
             const child = children[i] as HTMLElement;
-            child.classList.remove(styles['item-transition']);
+            if (child !== dragFromInfo?.targetItemElement) {
+              child.classList.remove(styles['item-transition']);
+            }
           }
         }
       });
@@ -1049,11 +1057,14 @@ export function useDragAndDrop<
   useEffect(() => {
     if (isPressing) return;
     if (!isDragging) return;
+    if (isFinalTransitioning.current) return;
     const dragFromInfo = getDragFromInfo();
     const dragToInfo = getDragToInfo();
 
     if (dragFromInfo === undefined) return;
     if (dragToInfo === undefined) return;
+
+    // console.log('@lists 에 대한 useEffect 호출됨.', performance.now());
 
     const moveBeforeDot = [dragFromInfo.latestAbsoluteX ?? 0, dragFromInfo.latestAbsoluteY ?? 0];
 
@@ -1066,20 +1077,27 @@ export function useDragAndDrop<
     
     isFinalTransitioning.current = true;
     child.style.zIndex = '2';
-    child.style.transform = `translateX(${diff[0]}px) translateY(${diff[1]}px)`;
+
+    const firstTransform = `translateX(${diff[0]}px) translateY(${diff[1]}px)`;
+    child.style.transform = firstTransform;
+    // console.log('1) firstTransform', firstTransform);
+
     setTimeout(() => {
       child.classList.add(styles['item-transition']);
+      // console.log('2) item-transition 클래스 추가');
     }, 20);
     setTimeout(() => {
       child.style.transform = `translateX(0px) translateY(0px)`;
+      // console.log('3) secondTransform', `translateX(0px) translateY(0px)`);
     }, 40);
     setTimeout(() => {
+      // console.log('4) finally');
       const draggingFormListClassNames = draggingFormListClassName.split(' ');
       const draggingNotFormListClassNames = draggingNotFormListClassName.split(' ');
       lists.forEach((value, name) => {
         if (isDraggingFrom(name)) {
           draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
-        } else if (isDraggingNotForm(name)) {
+        } else if (isDraggingNotFrom(name)) {
           draggingNotFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.add(c));
         } else {
           draggingFormListClassNames.filter(c => c.trim() !== '').forEach(c => value.ref.current?.classList.remove(c));
@@ -1096,7 +1114,7 @@ export function useDragAndDrop<
     isInit,
     isPressing,
     isDragging,
-    isDraggingNotForm,
+    isDraggingNotFrom,
     isDraggingFrom,
     getList,
     getLists,
