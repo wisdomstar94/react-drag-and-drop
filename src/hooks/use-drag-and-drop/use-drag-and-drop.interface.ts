@@ -49,6 +49,6 @@ export declare namespace IUseDragAndDrop {
     onListsChange?: (map: Map<E, T[]>) => void;
     onDestinationActiveListName?: (name: E | undefined) => void;
     onStartDrag?: (dragFromInfo: DragInfo<T, K, E>) => void;
-    onEndDrag?: (dragFromInfo?: DragInfo<T, K, E>, dragToInfo?: DragInfo<T, K, E>) => void;
+    onEndDrag?: (dragFromInfo: DragInfo<T, K, E> | undefined, dragToInfo: DragInfo<T, K, E> | undefined, newLists: [E, List<T, K>][]) => void;
   }
 }

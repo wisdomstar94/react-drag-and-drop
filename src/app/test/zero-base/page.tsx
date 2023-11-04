@@ -1,38 +1,48 @@
 "use client"
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
-import { createRef } from "react";
+import { createRef, useState } from "react";
+import { IUseDragAndDrop } from "../../../..";
+
+interface Item {
+  name: string;
+  value: string;
+}
 
 export default function ZeroBaseTestPage() {
-  const dnd = useDragAndDrop({
-    lists: [
-      [
-        'aList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'a', value: 'a', },
-            { name: 'aaa', value: 'aaa', },
-            { name: 'aaaaa', value: 'aaaaa', },
-            { name: 'aaaaaaa', value: 'aaaaaaa', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
+  const [dndLists, setDndLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'aList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'a', value: 'a', },
+          { name: 'aaa', value: 'aaa', },
+          { name: 'aaaaa', value: 'aaaaa', },
+          { name: 'aaaaaaa', value: 'aaaaaaa', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
         },
-      ],
-      [
-        'bList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
+      },
     ],
+    [
+      'bList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
+        },
+      },
+    ],
+  ]);
+  const dnd = useDragAndDrop({
+    lists: dndLists,
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndLists([...newLists]);
+    },
   });
 
   return (

@@ -34,6 +34,10 @@ export function useDragAndDrop<
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const isFinalTransitioning = useRef<boolean>(false);
 
+  // const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
+  // const lists = useMemo(() => {
+  //   return new Map(props.lists);
+  // }, [props.lists]);
   const [lists, setLists] = useState<Map<E, IUseDragAndDrop.List<T, K>>>(new Map());
 
   const body = useBody();
@@ -174,26 +178,27 @@ export function useDragAndDrop<
   }, [getDragFromInfo]);
 
   const getList = useCallback((key: E) => {
-    if (lists === undefined) return undefined;
-    return lists.get(key);
-  }, [lists]);
+    if (props.lists === undefined) return undefined;
+    const listsMap = new Map(props.lists);
+    return listsMap.get(key);
+  }, [props.lists]);
 
   const getLists = useCallback(() => {
-    return lists;
-  }, [lists]);
+    return new Map(props.lists);
+  }, [props.lists]);
 
-  const setItems = useCallback((key: E, items: T[]) => {
-    setLists(prev => {
-      const newLists = new Map(prev);
-      const keyList = prev.get(key);
-      if (keyList === undefined) {
-        return newLists;
-      }
-      keyList.items = items;
-      newLists.set(key, keyList);
-      return newLists;
-    });
-  }, []);
+  // const setItems = useCallback((key: E, items: T[]) => {
+  //   setLists(prev => {
+  //     const newLists = new Map(prev);
+  //     const keyList = prev.get(key);
+  //     if (keyList === undefined) {
+  //       return newLists;
+  //     }
+  //     keyList.items = items;
+  //     newLists.set(key, keyList);
+  //     return newLists;
+  //   });
+  // }, []);
 
   const isDraggingNotFrom = useCallback((name: E) => {
     return isPressing && isDragging && getList(name)?.isDragFrom !== true;
@@ -887,6 +892,8 @@ export function useDragAndDrop<
     if (lists === undefined) return;
     // console.log('@event', event);
 
+    // console.log('@prev', lists.get('aList')?.items);
+
     const dragFromInfo = getDragFromInfo();
     const dragToInfo = getDragToInfo();
 
@@ -939,25 +946,28 @@ export function useDragAndDrop<
       onListsChange(changeInfo);
     }
 
-    setLists(prev => {
+    const prev = lists;
+    const getNewLists = () => {
       const prevLists = new Map(prev); 
       const newLists = new Map(prev);
       prevLists.forEach((value, key) => {
-        value.isDragFrom = undefined;
-        value.isDragTo = undefined;
+        const newValue = { ...value };
+        newValue.isDragFrom = undefined;
+        newValue.isDragTo = undefined;
 
         if (key === dragFromInfo?.name) {
-          value.items = changeInfo.get(dragFromInfo.name) ?? [];
+          newValue.items = changeInfo.get(dragFromInfo.name) ?? [];
         }
 
         if (key === dragToInfo?.name) {
-          value.items = changeInfo.get(dragToInfo.name) ?? [];
+          newValue.items = changeInfo.get(dragToInfo.name) ?? [];
         }
 
-        newLists.set(key, value);
+        newLists.set(key, newValue);
       });
       return newLists;
-    });
+    };
+    const newLists = getNewLists();
 
     setIsPressing(false);
 
@@ -969,7 +979,7 @@ export function useDragAndDrop<
     }
 
     if (typeof onEndDrag === 'function') {
-      onEndDrag(dragFromInfo, dragToInfo);
+      onEndDrag(dragFromInfo, dragToInfo, Array.from(newLists.entries()));
     }
   }, [isPressing, lists, getDragFromInfo, getDragToInfo, onListsChange, isMobile, onEndDrag, body]);
 
@@ -1012,7 +1022,7 @@ export function useDragAndDrop<
     if (props.lists === undefined) return;
     setLists(new Map(props.lists));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.lists]);
 
   useEffect(() => {
     if (lists.size > 0) {
@@ -1061,8 +1071,13 @@ export function useDragAndDrop<
     const dragFromInfo = getDragFromInfo();
     const dragToInfo = getDragToInfo();
 
+    // console.log('@dragFromInfo', dragFromInfo);
+    // console.log('@dragToInfo', dragToInfo);
+
     if (dragFromInfo === undefined) return;
     if (dragToInfo === undefined) return;
+
+    const lists = new Map(props.lists);
 
     // console.log('@lists 에 대한 useEffect 호출됨.', performance.now());
 
@@ -1108,7 +1123,7 @@ export function useDragAndDrop<
       child.style.zIndex = '1';
     }, TRANSITION_DURATION + 10);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lists]);
+  }, [props.lists]);
 
   return {
     isInit,
@@ -1118,6 +1133,6 @@ export function useDragAndDrop<
     isDraggingFrom,
     getList,
     getLists,
-    setItems,
+    // setItems,
   };
 }

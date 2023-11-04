@@ -1,111 +1,125 @@
 "use client"
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
-import { createRef } from "react";
+import { createRef, useState } from "react";
 import styles from './page.module.scss';
+import { IUseDragAndDrop } from "../../../..";
+
+interface Item {
+  name: string;
+  value: string;
+}
 
 export default function BoardTestPage() {
-  const dndBoard = useDragAndDrop({
-    lists: [
-      [
-        'board',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'aList', value: 'aList', },
-            { name: 'bList', value: 'bList', },
-            { name: 'cList', value: 'cList', },
-            { name: 'dList', value: 'dList', },
-            { name: 'eList', value: 'eList', },
-          ],
-          listLayout: {
-            type: 'one-row-infinite',
-          },
+  const [dndBoardLists, setDndBoardLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'board',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'aList', value: 'aList', },
+          { name: 'bList', value: 'bList', },
+          { name: 'cList', value: 'cList', },
+          { name: 'dList', value: 'dList', },
+          { name: 'eList', value: 'eList', },
+        ],
+        listLayout: {
+          type: 'one-row-infinite',
         },
-      ],
+      },
     ],
+  ]);
+  const dndBoard = useDragAndDrop({
+    lists: dndBoardLists,
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndBoardLists([...newLists]);
+    },
   });
 
-  const dnd = useDragAndDrop({
-    lists: [
-      [
-        'aList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'a', value: 'a', },
-            { name: 'aaa', value: 'aaa', },
-            { name: 'aaaaa', value: 'aaaaa', },
-            { name: 'aaaaaaa', value: 'aaaaaaa', },
-          ],
-          listLayout: {
-            type: 'one-col-infinite',
-          },
+  const [dndLists, setDndLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'aList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'a', value: 'a', },
+          { name: 'aaa', value: 'aaa', },
+          { name: 'aaaaa', value: 'aaaaa', },
+          { name: 'aaaaaaa', value: 'aaaaaaa', },
+        ],
+        listLayout: {
+          type: 'one-col-infinite',
         },
-      ],
-      [
-        'bList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'b', value: 'b', },
-            { name: 'bbb', value: 'bbb', },
-            { name: 'bbbbb', value: 'bbbbb', },
-            { name: 'bbbbbbb', value: 'bbbbbbb', },
-          ],
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        },
-      ],
-      [
-        'cList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'c', value: 'c', },
-            { name: 'ccc', value: 'ccc', },
-            { name: 'ccccc', value: 'ccccc', },
-            { name: 'ccccccc', value: 'ccccccc', },
-          ],
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        },
-      ],
-      [
-        'dList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'd', value: 'd', },
-            { name: 'ddd', value: 'ddd', },
-            { name: 'ddddd', value: 'ddddd', },
-            { name: 'ddddddd', value: 'ddddddd', },
-          ],
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        },
-      ],
-      [
-        'eList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'e', value: 'e', },
-            { name: 'eee', value: 'eee', },
-            { name: 'eeeee', value: 'eeeee', },
-            { name: 'eeeeeee', value: 'eeeeeee', },
-          ],
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        },
-      ],
+      },
     ],
+    [
+      'bList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'b', value: 'b', },
+          { name: 'bbb', value: 'bbb', },
+          { name: 'bbbbb', value: 'bbbbb', },
+          { name: 'bbbbbbb', value: 'bbbbbbb', },
+        ],
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      },
+    ],
+    [
+      'cList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'c', value: 'c', },
+          { name: 'ccc', value: 'ccc', },
+          { name: 'ccccc', value: 'ccccc', },
+          { name: 'ccccccc', value: 'ccccccc', },
+        ],
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      },
+    ],
+    [
+      'dList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'd', value: 'd', },
+          { name: 'ddd', value: 'ddd', },
+          { name: 'ddddd', value: 'ddddd', },
+          { name: 'ddddddd', value: 'ddddddd', },
+        ],
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      },
+    ],
+    [
+      'eList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'e', value: 'e', },
+          { name: 'eee', value: 'eee', },
+          { name: 'eeeee', value: 'eeeee', },
+          { name: 'eeeeeee', value: 'eeeeeee', },
+        ],
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      },
+    ],
+  ]);
+  const dnd = useDragAndDrop({
+    lists: dndLists,
     draggingItemClassName: styles['drag-from-item-effect'],
     draggingFormListClassName: styles['from-item-list-active'],
     draggingNotFormListClassName: styles['from-item-list-expect-other-list-active'],
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndLists([...newLists]);
+    },
   });
 
   return (

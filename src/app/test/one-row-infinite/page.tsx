@@ -1,41 +1,51 @@
 "use client"
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
-import { createRef } from "react";
+import { createRef, useState } from "react";
+import { IUseDragAndDrop } from "../../../..";
+
+interface Item {
+  name: string;
+  value: string;
+}
 
 export default function OneRowInfiniteTestPage() {
-  const dnd = useDragAndDrop({
-    lists: [
-      [
-        'aList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'aaaaaaaaaaaaaaa', value: 'a', },
-            { name: 'aaa', value: 'aaa', },
-            { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaaaa', },
-            { name: 'aaaaaaa', value: 'aaaaaaa', },
-          ],
-          listLayout: {
-            type: 'one-row-infinite',
-          },
+  const [dndLists, setDndLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'aList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'aaaaaaaaaaaaaaa', value: 'a', },
+          { name: 'aaa', value: 'aaa', },
+          { name: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', value: 'aaaaa', },
+          { name: 'aaaaaaa', value: 'aaaaaaa', },
+        ],
+        listLayout: {
+          type: 'one-row-infinite',
         },
-      ],
-      [
-        'bList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'bbbbbbbbbbbbbbb', value: 'b', },
-            { name: 'bbb', value: 'bbb', },
-            { name: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', value: 'bbbbb', },
-            { name: 'bbbbbbb', value: 'bbbbbbb', },
-          ],
-          listLayout: {
-            type: 'one-row-infinite',
-          },
-        },
-      ],
+      },
     ],
+    [
+      'bList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'bbbbbbbbbbbbbbb', value: 'b', },
+          { name: 'bbb', value: 'bbb', },
+          { name: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', value: 'bbbbb', },
+          { name: 'bbbbbbb', value: 'bbbbbbb', },
+        ],
+        listLayout: {
+          type: 'one-row-infinite',
+        },
+      },
+    ],
+  ]);
+  const dnd = useDragAndDrop({
+    lists: dndLists,
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndLists([...newLists]);
+    },
   });
 
   return (

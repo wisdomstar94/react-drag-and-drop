@@ -1,95 +1,105 @@
 "use client"
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
-import { createRef } from "react";
+import { createRef, useState } from "react";
 import styles from './page.module.scss';
+import { IUseDragAndDrop } from "../../../..";
+
+interface Item {
+  name: string;
+  value: string;
+}
 
 export default function DragEffectTestPage() {
-  const dnd = useDragAndDrop({
-    lists: [
-      [
-        'aList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'a', value: 'a', },
-            { name: 'aaa', value: 'aaa', },
-            { name: 'aaaaa', value: 'aaaaa', },
-            { name: 'aaaaaaa', value: 'aaaaaaa', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
+  const [dndLists, setDndLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'aList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'a', value: 'a', },
+          { name: 'aaa', value: 'aaa', },
+          { name: 'aaaaa', value: 'aaaaa', },
+          { name: 'aaaaaaa', value: 'aaaaaaa', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
         },
-      ],
-      [
-        'bList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'b', value: 'b', },
-            { name: 'bbb', value: 'bbb', },
-            { name: 'bbbbb', value: 'bbbbb', },
-            { name: 'bbbbbbb', value: 'bbbbbbb', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
-      [
-        'cList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'c', value: 'c', },
-            { name: 'ccc', value: 'ccc', },
-            { name: 'ccccc', value: 'ccccc', },
-            { name: 'ccccccc', value: 'ccccccc', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
-      [
-        'dList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'd', value: 'd', },
-            { name: 'ddd', value: 'ddd', },
-            { name: 'ddddd', value: 'ddddd', },
-            { name: 'ddddddd', value: 'ddddddd', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
-      [
-        'eList',
-        {
-          ref: createRef<HTMLDivElement>(),
-          items: [
-            { name: 'e', value: 'e', },
-            { name: 'eee', value: 'eee', },
-            { name: 'eeeee', value: 'eeeee', },
-            { name: 'eeeeeee', value: 'eeeeeee', },
-          ],
-          listLayout: {
-            type: 'fixed-col-count-grid',
-            fixedColCount: 2,
-          },
-        },
-      ],
+      },
     ],
+    [
+      'bList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'b', value: 'b', },
+          { name: 'bbb', value: 'bbb', },
+          { name: 'bbbbb', value: 'bbbbb', },
+          { name: 'bbbbbbb', value: 'bbbbbbb', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
+        },
+      },
+    ],
+    [
+      'cList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'c', value: 'c', },
+          { name: 'ccc', value: 'ccc', },
+          { name: 'ccccc', value: 'ccccc', },
+          { name: 'ccccccc', value: 'ccccccc', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
+        },
+      },
+    ],
+    [
+      'dList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'd', value: 'd', },
+          { name: 'ddd', value: 'ddd', },
+          { name: 'ddddd', value: 'ddddd', },
+          { name: 'ddddddd', value: 'ddddddd', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
+        },
+      },
+    ],
+    [
+      'eList',
+      {
+        ref: createRef<HTMLDivElement>(),
+        items: [
+          { name: 'e', value: 'e', },
+          { name: 'eee', value: 'eee', },
+          { name: 'eeeee', value: 'eeeee', },
+          { name: 'eeeeeee', value: 'eeeeeee', },
+        ],
+        listLayout: {
+          type: 'fixed-col-count-grid',
+          fixedColCount: 2,
+        },
+      },
+    ],
+  ]);
+  const dnd = useDragAndDrop({
+    lists: dndLists,
     draggingItemClassName: styles['drag-from-item-effect'],
     draggingFormListClassName: styles['from-item-list-active'],
     draggingNotFormListClassName: styles['from-item-list-expect-other-list-active'],
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndLists([...newLists]);
+    },
   });
 
   return (
@@ -132,7 +142,8 @@ export default function DragEffectTestPage() {
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
                 // dnd.isDraggingNotForm('bList') ? styles['from-item-list-expect-other-list-active'] : '',
                 // dnd.isDraggingFrom('bList') ? styles['from-item-list-active'] : '',
-              ].join(' ')}>
+              ].join(' ')}
+              data-is-dnd-list={true}>
               {
                 dnd.getList('bList')?.items.map((item) => (
                   <div className="inline-flex text-xs" key={item.value}>
@@ -157,7 +168,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('cList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-              ].join(' ')}>
+              ].join(' ')}
+              data-is-dnd-list={true}>
               {
                 dnd.getList('cList')?.items.map((item) => (
                   <div className="inline-flex text-xs" key={item.value}>
@@ -182,7 +194,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('dList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-              ].join(' ')}>
+              ].join(' ')}
+              data-is-dnd-list={true}>
               {
                 dnd.getList('dList')?.items.map((item) => (
                   <div className="inline-flex text-xs" key={item.value}>
@@ -207,7 +220,8 @@ export default function DragEffectTestPage() {
               ref={dnd.getList('eList')?.ref} 
               className={[
                 "bg-blue-200 p-2 pb-24 grid grid-cols-2 h-screen items-start content-start",
-              ].join(' ')}>
+              ].join(' ')}
+              data-is-dnd-list={true}>
               {
                 dnd.getList('eList')?.items.map((item) => (
                   <div className="inline-flex text-xs" key={item.value}>

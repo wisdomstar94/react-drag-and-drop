@@ -1,42 +1,52 @@
 "use client"
 import { useDragAndDrop } from "@/hooks/use-drag-and-drop/use-drag-and-drop.hook";
 import { ICommon } from "@/interfaces/common.interface";
-import { createRef, useCallback, useEffect } from "react";
+import { createRef, useCallback, useEffect, useState } from "react";
+import { IUseDragAndDrop } from "../../../..";
+
+interface Item {
+  name: string;
+  value: string;
+}
 
 export default function ItemSelfDnDHanlderTestPage() {
-  const dnd = useDragAndDrop({
-    lists: [
-      [
-        'aList', 
-        {
-          items: [
-            { name: 'a', value: 'a' },
-            { name: 'aaa', value: 'aaa' },
-            { name: 'aaaaa', value: 'aaaaa' },
-            { name: 'aaaaaaa', value: 'aaaaaaa' },
-          ] as ICommon.Item[],
-          ref: createRef<HTMLDivElement>(),
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        }
-      ],
-      [
-        'bList', 
-        {
-          items: [
-            { name: 'b', value: 'b' },
-            { name: 'bbb', value: 'bbb' },
-            { name: 'bbbbb', value: 'bbbbb' },
-            { name: 'bbbbbbb', value: 'bbbbbbb' },
-          ] as ICommon.Item[],
-          ref: createRef<HTMLDivElement>(),
-          listLayout: {
-            type: 'one-col-infinite',
-          },
-        }
-      ],
+  const [dndLists, setDndLists] = useState<[string, IUseDragAndDrop.List<Item, HTMLDivElement>][]>([
+    [
+      'aList', 
+      {
+        items: [
+          { name: 'a', value: 'a' },
+          { name: 'aaa', value: 'aaa' },
+          { name: 'aaaaa', value: 'aaaaa' },
+          { name: 'aaaaaaa', value: 'aaaaaaa' },
+        ] as ICommon.Item[],
+        ref: createRef<HTMLDivElement>(),
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      }
     ],
+    [
+      'bList', 
+      {
+        items: [
+          { name: 'b', value: 'b' },
+          { name: 'bbb', value: 'bbb' },
+          { name: 'bbbbb', value: 'bbbbb' },
+          { name: 'bbbbbbb', value: 'bbbbbbb' },
+        ] as ICommon.Item[],
+        ref: createRef<HTMLDivElement>(),
+        listLayout: {
+          type: 'one-col-infinite',
+        },
+      }
+    ],
+  ]);
+  const dnd = useDragAndDrop({
+    lists: dndLists,
+    onEndDrag(dragFromInfo, dragToInfo, newLists) {
+      setDndLists([...newLists]);
+    },
   });
 
   const onItemClick = useCallback((item: ICommon.Item) => {
